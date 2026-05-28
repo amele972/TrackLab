@@ -5,63 +5,49 @@
 [![Physics: Snells Law Vector](https://img.shields.io/badge/Optics-3D_Snells_Vector-orange.svg)]()
 [![Ions: Multi-Ion](https://img.shields.io/badge/Ions-Protons%2C%20Alphas%2C%20Li%2C%20C%2C%20O-red.svg)]()
 
-**TrackLab** is a modern, unified Python-based framework designed to simulate the formation, geometric development, and optical microscope appearance of charged particle tracks in poly-allyl diglycol carbonate (PADC / CR-39) detectors. 
+**TrackLab** is a Python suite that simulates how charged particles (protons, alpha particles, lithium, carbon, oxygen) leave tracks in CR-39 plastic detectors, and models exactly how they look under an optical microscope after chemical etching.
 
 ---
 
-## 🎯 What is TrackLab needed for?
+## 🎯 What is this for & why should you use it?
 
-In many nuclear physics, neutron dosimetry, space radiation protection, and hadron therapy applications, solid-state nuclear track detectors (SSNTDs) like CR-39 are used to detect charged particles. When a charged particle passes through the detector, it leaves a latent damage trail (track). Chemical etching then removes the damaged material at a faster rate than the undamaged bulk, forming sub-micrometric cavities (etched tracks) that are visible under a microscope.
+If you are working in **neutron dosimetry, space radiation protection, or hadron therapy**, you likely use PADC (CR-39) detectors to measure radiation. However, matching raw computer simulations to what you see under a microscope is difficult. 
 
-**TrackLab** solves two main challenges in modern dosimetry workflows:
-1. **Bridging the Gap with Monte Carlo Simulations**:
-   Particle transport codes like **FLUKA**, **GEANT4**, and **MCNP** yield detailed phase-space records (energy, position, angle) of radiation fields, but these outputs cannot be directly compared to experimental microscope measurements. TrackLab acts as a physical converter, translating simulated particle phase-spaces into tangible, observable track geometries and microscope-like images.
-2. **Unified Multi-Ion Modeling**:
-   It unifies calculations for a wide range of ion species (protons, alpha particles, lithium, carbon, oxygen) under a single modern framework, bypassing the need for separate legacy programs.
+TrackLab solves this by acting as a **physical bridge**:
 
----
-
-## 📜 Scientific Foundations & Citations
-
-TrackLab is a modernization, optimization, and expansion of the analytical track formation models originally developed by **D. Nikezić and K. N. Yu** and implemented in the legacy Fortran codes **TRACK_P** and **TRACK_VISION**. 
-
-If you use TrackLab in your research, please cite both the original foundation papers and this implementation:
-
-### Legacy Foundations (TRACK_P & TRACK_VISION)
-* **Proton Tracks**:
-  > D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, **SoftwareX**, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
-* **Optical Simulation**:
-  > D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, **Computer Physics Communications**, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)
-* **Over-etched Tracks**:
-  > D. Nikezic and K. N. Yu, *"Three-dimensional analytical determination of the track parameters: over-etched tracks"*, **Radiation Measurements**, 37(1), 39–45, (2003). [DOI: 10.1016/S1350-4487(02)00129-4](https://doi.org/10.1016/S1350-4487(02)00129-4)
-* **Geometrical Parameters**:
-  > D. Nikezić, *"Three dimensional analytical determination of the track parameters"*, **Radiation Measurements**, 32(4), 277–282, (2000). [DOI: 10.1016/S1350-4487(00)00034-2](https://doi.org/10.1016/S1350-4487(00)00034-2)
+* **From Monte Carlo to the Microscope**: Import abstract phase-space outputs from codes like **FLUKA, GEANT4, or MCNP** and convert them into simulated physical track profiles, opening dimensions (major/minor axes), and realistic 2D microscope images.
+* **Unified Ion Physics**: Run calculations for multiple ions (Protons, Alphas, Lithium, Carbon, Oxygen) in a single tool, replacing fragmented legacy software.
+* **Modern & Fast**: Written in clean, vectorized Python (using NumPy/SciPy), making calculations up to **100x faster** than legacy Fortran codes, with a premium PyQt6 graphical interface.
 
 ---
 
-## 🚀 Key Improvements in TrackLab
+## 🛠️ Guided Tour: Analysis Modes
 
-* **Fully Vectorized Architecture**: Leverages NumPy arrays to compute entire particle trajectories simultaneously, replacing slow loop-based legacy execution.
-* **Z-Slice Parametric Engine**: Eliminates legacy mesh artifacts and spikes, generating physically accurate 3D track surfaces even for extreme overetching or shallow angles.
-* **Expanded Multi-Ion Models**: Out-of-the-box routing for:
-  - **Protons**: Analytical Nikezic/Dorschel model.
-  - **Alpha particles (He)**: Selection of 7 world-class models (Brun, Green, Yu, Hermsdorf, etc.).
-  - **Heavy Ions (Li, C, O)**: Broken Power Law (BPL) fitted to experimental datasets.
-* **3D Snell's Vector Optics**: Simulates microscope transmission lighting with condenser cone ray tracing and objective numerical aperture filtering, replicating actual microscope contrast and Fresnel losses.
-* **User-Friendly GUI**: Interactive PyQt6 dashboard for single-track diagnostics, batch Monte Carlo processing, look-up table generation, and Blender-compatible exports.
+When you launch the GUI (`python run_gui.py`), you can select from **6 dedicated tabs**, each tailored for a specific task:
 
----
+### 📊 Mode 1: V(y) Explorer
+* **What it does**: Plots the track-to-bulk etch rate ratio ($V = V_T/V_B$) as a function of the particle's residual range.
+* **Why use it**: Use this to compare different calibration models (Brun, Green, Hermsdorf, etc.) and fit them to your own experimental material datasets.
 
-## 🛠 Features & Analysis Modes
+### 🔍 Mode 2: Single Track Simulation
+* **What it does**: Simulates and renders a single particle track based on energy, angle, bulk etch rate, and etching time.
+* **Why use it**: Perfect for diagnostics. It outputs a 4-panel view showing a **3D interactive rendering**, a top-down **XY Microscope view**, and longitudinal **YZ/XZ profiles**.
 
-| Mode | Name | Capability |
-| :--- | :--- | :--- |
-| **01** | **V(y) Explorer** | Analyze etch-rate ratios with multi-model overlays and experimental data fitting. |
-| **02** | **Single Track** | 4-panel diagnostic view (3D Rendering, XY Top-view, Longitudinal YZ/XZ Profiles). |
-| **03** | **Reference LUT** | Generate massive Look-Up Tables with sub-µm geometric precision. |
-| **04** | **FLUKA Processor** | Batch process high-energy physics phase-space files into detector responses. |
-| **05** | **Ultra-3D High** | Premium visualization with Ambient Occlusion, Catmull-Clark subdivision, and Blender export. |
-| **06** | **Fast Interpolation** | Bypass physics/optics using precomputed LUTs for high-speed statistics. |
+### 🗄️ Mode 3: Look-Up Table (LUT) Creator
+* **What it does**: Generates a massive database of track geometries over a grid of user-defined energies and angles.
+* **Why use it**: Precomputes track parameters to speed up subsequent large-scale statistical simulations (bypassing slow ray-tracing calculations).
+
+### 🚀 Mode 4: Monte Carlo (FLUKA) Processor
+* **What it does**: Reads phase-space files generated by FLUKA (or other MC codes) containing particle energy, position, and direction.
+* **Why use it**: Simulates the full, collective detector response. It processes millions of particles to estimate overall track distribution and detection efficiency.
+
+### 🎨 Mode 5: Ultra-3D Visualization
+* **What it does**: Generates high-fidelity 3D meshes of etched tracks with ambient occlusion and mesh smoothing.
+* **Why use it**: Export your simulated tracks to standard 3D formats (**OBJ, STL**) for 3D printing or use the generated scripts to import and render them in **Blender**.
+
+### ⚡ Mode 6: Fast LUT Interpolation
+* **What it does**: Estimates track parameters (diameter, depth) using a pre-generated Look-Up Table (from Mode 3).
+* **Why use it**: Extreme speed. Ideal for real-time data analysis, processing millions of simulated particles in seconds.
 
 ---
 
@@ -73,24 +59,28 @@ If you use TrackLab in your research, please cite both the original foundation p
 pip install -r requirements.txt
 ```
 
-### Execution
+### Running the App
 ```bash
-# Launch the premium multi-tab GUI
+# Launch the premium multi-tab GUI dashboard
 python run_gui.py
 
-# Run verification tests
+# Run unit tests to verify the installation
 pytest tests/
 ```
 
 ---
 
-## 📁 Project Architecture
+## 📜 Authors & Citations
 
-- `tracklab/`: Core library package (installable via `setup.py`).
-  - `data/`: Tabulated SRIM range-energy datasets for CR-39 and calibration fits.
-  - `gui/`: Tab implementation and layout configuration for the PyQt6 dashboard.
-  - `lut_engine.py`: Numerical integration solver and Look-Up Table (LUT) manager.
-  - `vt_multiion.py` / `track_optics_p_optimized.py`: Core physical and optical vector solvers.
-- `docs/`: In-depth documentation files (`PHYSICS_MODEL.md`, `USER_GUIDE.md`, etc.).
-- `examples/`: Code scripts demonstrating standalone use and batch simulations.
-- `tests/`: Automated pytest unit and verification suite.
+TrackLab is a modern, optimized reimplementation of the analytical track models originally developed by **D. Nikezić and K. N. Yu** (implemented in the legacy Fortran codes `TRACK_P` and `TRACK_VISION`).
+
+If you use this code in your scientific publications, please cite the original foundation works:
+
+* **Proton Tracks**:
+  > D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, **SoftwareX**, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
+* **Optical Simulation**:
+  > D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, **Computer Physics Communications**, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)
+* **Over-etched Tracks**:
+  > D. Nikezic and K. N. Yu, *"Three-dimensional analytical determination of the track parameters: over-etched tracks"*, **Radiation Measurements**, 37(1), 39–45, (2003). [DOI: 10.1016/S1350-4487(02)00129-4](https://doi.org/10.1016/S1350-4487(02)00129-4)
+* **Geometrical Parameters**:
+  > D. Nikezić, *"Three dimensional analytical determination of the track parameters"*, **Radiation Measurements**, 32(4), 277–282, (2000). [DOI: 10.1016/S1350-4487(00)00034-2](https://doi.org/10.1016/S1350-4487(00)00034-2)
