@@ -138,57 +138,6 @@ class VTMultiIonModel:
         # Manual parameter overrides for calibrated validation series (Perfect Fit Calibration)
         # These are enabled to ensure calibrated parameters are used instead of automatic fitting to live Data_ions.xlsx
         self.param_overrides = {
-            "Li": {
-                2.87: {
-                    "A": 1.9197,
-                    "y0": 6.1250,
-                    "alpha": 1.4343,
-                    "beta": 18.6993,
-                    "r2": 0.999,
-                },
-                4.82: {
-                    "A": 3.1416,
-                    "y0": 3.0855,
-                    "alpha": 1.6366,
-                    "beta": 1.3550,
-                    "r2": 0.999,
-                },
-                6.75: {
-                    "A": 2.7982,
-                    "y0": 3.9384,
-                    "alpha": 1.8076,
-                    "beta": 1.8535,
-                    "r2": 0.999,
-                },
-                7.99: {
-                    "A": 1.3269,
-                    "y0": 5.5365,
-                    "alpha": 1.7065,
-                    "beta": 1.8445,
-                    "r2": 0.999,
-                },
-                9.02: {
-                    "A": 4.5552,
-                    "y0": 3.3722,
-                    "alpha": 1.5230,
-                    "beta": 1.3259,
-                    "r2": 0.999,
-                },
-                10.96: {
-                    "A": 7.9756,
-                    "y0": 15.0555,
-                    "alpha": 2.0e-9,
-                    "beta": 1.6365,
-                    "r2": 0.999,
-                },
-                11.99: {
-                    "A": 3.7111,
-                    "y0": 2.9485,
-                    "alpha": 1.6837,
-                    "beta": 0.9994,
-                    "r2": 0.999,
-                },
-            },
             "C": {
                 14.80: {
                     "A": 32.8938,
