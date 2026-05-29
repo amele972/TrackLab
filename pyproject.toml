@@ -51,6 +51,8 @@ tracklab = ["data/*.dat", "data/*.xlsx"]
 
 [tool.ruff]
 line-length = 88
+exclude = [".git", "__pycache__", "build", "dist", "docs"]
+
+[tool.ruff.lint]
 select = ["E", "F", "W", "I"]
 ignore = []
-exclude = [".git", "__pycache__", "build", "dist", "docs"]
