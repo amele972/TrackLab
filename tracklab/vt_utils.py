@@ -37,17 +37,7 @@ from scipy.integrate import cumulative_trapezoid
 from scipy.interpolate import PchipInterpolator
 
 # ============================================================================
-# VT parameters  (modifiable for parameter sweeps)
-# ============================================================================
-
-vt_params = {
-    "a1": 0.4306,
-    "a2": 7.3736e-3,
-    "a3": 1.0559,
-    "a4": 0.1072,
-    "a5": 1.4120,
-}
-
+from .config import PROTON_VT_PARAMS
 
 # ============================================================================
 # VT function  (Hermsdorf parametrization — protons only)
@@ -119,7 +109,7 @@ def vt_function(y):
         )
     else:
         # Model 1: Double-Exponential (Original Nikezic)
-        p = vt_params
+        p = PROTON_VT_PARAMS
         v = 1.0 + (p["a1"] * np.exp(-p["a2"] * y) + p["a3"] * np.exp(-p["a4"] * y)) * (
             1.0 - np.exp(-p["a5"] * y)
         )
@@ -256,7 +246,7 @@ def build_vrint_interpolator(
 
         # Build cache key including ion and alpha model index if applicable
         alpha_idx = ALPHA_VT_MODEL if ion == "alpha" else 0
-        cache_key = (ion, alpha_idx, vb, R_max, N, tuple(sorted(vt_params.items())))
+        cache_key = (ion, alpha_idx, vb, R_max, N)
 
         if cache_key in _VRINT_CACHE:
             return _VRINT_CACHE[cache_key]

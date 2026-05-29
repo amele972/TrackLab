@@ -290,7 +290,7 @@ class LUTEngine:
             raise FileNotFoundError(filepath)
 
         with open(filepath, "r") as fh:
-            raw = [l.strip() for l in fh if l.strip()]
+            raw = [line.strip() for line in fh if line.strip()]
         lines = raw[skip_header:]
         if max_lines is not None:
             lines = lines[:max_lines]

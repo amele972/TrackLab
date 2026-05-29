@@ -40,6 +40,15 @@ VB = VB_BY_ION["protons"]
 # 5: Optimized Double-Exponential
 PROTON_VT_MODEL = 1
 
+# Nominal parameters for Proton VT Double-Exponential Model
+PROTON_VT_PARAMS = {
+    "a1": 0.4306,
+    "a2": 7.3736e-3,
+    "a3": 1.0559,
+    "a4": 0.1072,
+    "a5": 1.4120,
+}
+
 # ============================================================================
 # ALPHA PARTICLE VT MODELS
 # ============================================================================

@@ -219,7 +219,7 @@ class FlukaWorker(QThread):
 
             self.status_update.emit("Reading FLUKA file…")
             with open(self.params["file"], "r") as f:
-                lines = [l.strip() for l in f if l.strip()]
+                lines = [line.strip() for line in f if line.strip()]
             lines = lines[self.params.get("skip_header", 1) :]
             total = len(lines)
 

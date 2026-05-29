@@ -47,7 +47,6 @@ from .vt_utils import (
     clear_vrint_cache,
     fast_dint3,
     vt_function,
-    vt_params,
 )
 
 # ── Optional modules (may not be needed for basic usage) ─────────────
@@ -57,7 +56,7 @@ except ImportError:
     LUTEngine = None
 
 try:
-    from .mode4_enhanced import (
+    from .mode_use import (
         calculate_ambient_occlusion,
         create_blender_script,
         export_to_obj,

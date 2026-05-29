@@ -233,7 +233,7 @@ class Enhanced3DTab(QWidget):
     def _advanced(self, X, Y, Z, B):
         try:
             from tracklab.config import CONDENSER_NA, N_CONE_RAYS
-            from tracklab.mode4_enhanced import (
+            from tracklab.mode_use import (
                 calculate_ambient_occlusion,
                 subdivide_mesh,
             )
@@ -267,7 +267,7 @@ class Enhanced3DTab(QWidget):
         if not outdir:
             return
         try:
-            from tracklab.mode4_enhanced import (
+            from tracklab.mode_use import (
                 create_blender_script,
                 export_to_obj,
                 export_to_stl,

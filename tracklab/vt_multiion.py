@@ -261,6 +261,41 @@ class VTMultiIonModel:
 
     def _load_and_fit(self, xlsx_path):
         """Load Excel data, compute V = VT/VB_FIT, fit BPL per (ion, energy)."""
+        xlsx_path_obj = Path(xlsx_path)
+        cache_path = xlsx_path_obj.parent / "bpl_fits_cache.json"
+
+        use_cache = False
+        if cache_path.exists():
+            try:
+                xlsx_mtime = xlsx_path_obj.stat().st_mtime
+                cache_mtime = cache_path.stat().st_mtime
+                if cache_mtime > xlsx_mtime:
+                    use_cache = True
+            except Exception:
+                pass
+
+        if use_cache:
+            try:
+                import json
+
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    cache_data = json.load(f)
+
+                # Convert string keys back to float
+                self.model_data = {
+                    ion: {float(e): params for e, params in params_by_e.items()}
+                    for ion, params_by_e in cache_data.get("model_data", {}).items()
+                }
+                self.ions_in_data = cache_data.get("ions_in_data", [])
+                print(f"[VTMultiIonModel] Loaded BPL fits from cache: {cache_path}")
+
+                self._apply_overrides_and_build_interpolators()
+                return
+            except Exception as e:
+                print(
+                    f"[VTMultiIonModel] Warning: failed to load cache {cache_path}: {e}. Recalculating fits..."
+                )
+
         try:
             df = pd.read_excel(xlsx_path)
         except Exception as e:
@@ -307,6 +342,22 @@ class VTMultiIonModel:
                 else:
                     print(f"  {ion:8s} {energy:6.2f} MeV: fit failed")
 
+        try:
+            import json
+
+            cache_data = {
+                "model_data": self.model_data,
+                "ions_in_data": self.ions_in_data,
+            }
+            with open(cache_path, "w", encoding="utf-8") as f:
+                json.dump(cache_data, f, indent=2)
+            print(f"[VTMultiIonModel] Saved BPL fits to cache: {cache_path}")
+        except Exception as e:
+            print(f"[VTMultiIonModel] Warning: failed to save cache: {e}")
+
+        self._apply_overrides_and_build_interpolators()
+
+    def _apply_overrides_and_build_interpolators(self):
         # Apply manual overrides for specific calibrated series (Lithium)
         for ion, energies in self.param_overrides.items():
             if ion in self.model_data:

@@ -30,13 +30,13 @@ from .workers import GenericWorker
 
 
 def _section_label(text, size=10):
-    l = QLabel(text)
+    lbl = QLabel(text)
     f = QFont()
     f.setBold(True)
     f.setPointSize(size)
-    l.setFont(f)
-    l.setStyleSheet("color: #89b4fa;")
-    return l
+    lbl.setFont(f)
+    lbl.setStyleSheet("color: #89b4fa;")
+    return lbl
 
 
 # ── LUT Loader Mixin ────────────────────────────────────────────────

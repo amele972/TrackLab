@@ -264,7 +264,7 @@ def run_mode4_fluka(
     vt_model = get_model()
 
     with open(input_file, "r") as f:
-        lines = [l.strip() for l in f if l.strip()]
+        lines = [line.strip() for line in f if line.strip()]
     lines = lines[skip_header:]
     total = len(lines)
     print(f"  {total} particles")
@@ -338,13 +338,6 @@ def run_mode5_3d_enhanced(
         try:
             import os
 
-            from .mode4_enhanced import (
-                create_blender_script,
-                export_to_obj,
-                export_to_stl,
-                subdivide_mesh,
-            )
-
             X, Y, Z = subdivide_mesh(
                 res["X_surf"], res["Y_surf"], res["Z_surf"], subdivisions=1
             )
@@ -358,6 +351,166 @@ def run_mode5_3d_enhanced(
         except Exception as e:
             print(f"  Export error: {e}")
     return res
+
+
+def subdivide_mesh(X, Y, Z, subdivisions=1):
+    """Catmull-Clark-style mesh subdivision for smoother surfaces."""
+    for _ in range(subdivisions):
+        N, M = X.shape
+        N2, M2 = 2 * N - 1, 2 * M - 1
+        Xn = np.zeros((N2, M2))
+        Yn = np.zeros((N2, M2))
+        Zn = np.zeros((N2, M2))
+        Xn[::2, ::2] = X
+        Yn[::2, ::2] = Y
+        Zn[::2, ::2] = Z
+        Xn[::2, 1::2] = (X[:, :-1] + X[:, 1:]) / 2
+        Yn[::2, 1::2] = (Y[:, :-1] + Y[:, 1:]) / 2
+        Zn[::2, 1::2] = (Z[:, :-1] + Z[:, 1:]) / 2
+        Xn[1::2, ::2] = (X[:-1, :] + X[1:, :]) / 2
+        Yn[1::2, ::2] = (Y[:-1, :] + Y[1:, :]) / 2
+        Zn[1::2, ::2] = (Z[:-1, :] + Z[1:, :]) / 2
+        Xn[1::2, 1::2] = (X[:-1, :-1] + X[1:, :-1] + X[:-1, 1:] + X[1:, 1:]) / 4
+        Yn[1::2, 1::2] = (Y[:-1, :-1] + Y[1:, :-1] + Y[:-1, 1:] + Y[1:, 1:]) / 4
+        Zn[1::2, 1::2] = (Z[:-1, :-1] + Z[1:, :-1] + Z[:-1, 1:] + Z[1:, 1:]) / 4
+        X, Y, Z = Xn, Yn, Zn
+    return X, Y, Z
+
+
+def calculate_ambient_occlusion(X, Y, Z, samples=16, radius=1.0):
+    """Screen-space ambient occlusion approximation."""
+    from scipy.ndimage import gaussian_filter
+
+    N, M = Z.shape
+    ao_map = np.ones((N, M))
+    di_r = int(radius * 2)
+    for i in range(1, N - 1):
+        for j in range(1, M - 1):
+            z_c = Z[i, j]
+            occ = 0.0
+            cnt = 0
+            for di in range(-di_r, di_r + 1):
+                for dj in range(-di_r, di_r + 1):
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < N and 0 <= nj < M:
+                        dist = np.sqrt(di**2 + dj**2)
+                        if 0 < dist <= radius:
+                            if Z[ni, nj] > z_c:
+                                occ += 1.0 / dist
+                            cnt += 1
+            if cnt > 0:
+                ao_map[i, j] = 1.0 - min(occ / cnt, 1.0)
+    return gaussian_filter(ao_map, sigma=1.0)
+
+
+def export_to_obj(X, Y, Z, filename, B_faces=None):
+    """Export mesh to Wavefront OBJ format."""
+    N, M = X.shape
+    with open(filename, "w") as f:
+        f.write("# Track mesh — TrackLab\n\n# Vertices\n")
+        for i in range(N):
+            for j in range(M):
+                f.write(f"v {X[i, j]:.6f} {Y[i, j]:.6f} {Z[i, j]:.6f}\n")
+        f.write("\n# Normals\n")
+        for i in range(N):
+            for j in range(M):
+                if i < N - 1 and j < M - 1:
+                    v1 = np.array(
+                        [
+                            X[i + 1, j] - X[i, j],
+                            Y[i + 1, j] - Y[i, j],
+                            Z[i + 1, j] - Z[i, j],
+                        ]
+                    )
+                    v2 = np.array(
+                        [
+                            X[i, j + 1] - X[i, j],
+                            Y[i, j + 1] - Y[i, j],
+                            Z[i, j + 1] - Z[i, j],
+                        ]
+                    )
+                    n = np.cross(v1, v2)
+                    m = np.linalg.norm(n)
+                    n = n / m if m > 0 else np.array([0, 0, 1])
+                else:
+                    n = np.array([0, 0, 1])
+                f.write(f"vn {n[0]:.6f} {n[1]:.6f} {n[2]:.6f}\n")
+        f.write("\n# Faces\n")
+        for i in range(N - 1):
+            for j in range(M - 1):
+                v1 = i * M + j + 1
+                v2 = i * M + j + 2
+                v3 = (i + 1) * M + j + 2
+                v4 = (i + 1) * M + j + 1
+                f.write(f"f {v1}//{v1} {v2}//{v2} {v3}//{v3} {v4}//{v4}\n")
+    print(f"  Exported OBJ: {filename}")
+
+
+def export_to_stl(X, Y, Z, filename):
+    """Export mesh to ASCII STL format."""
+    N, M = X.shape
+    with open(filename, "w") as f:
+        f.write("solid TrackMesh\n")
+        for i in range(N - 1):
+            for j in range(M - 1):
+                v1 = np.array([X[i, j], Y[i, j], Z[i, j]])
+                v2 = np.array([X[i, j + 1], Y[i, j + 1], Z[i, j + 1]])
+                v3 = np.array([X[i + 1, j + 1], Y[i + 1, j + 1], Z[i + 1, j + 1]])
+                v4 = np.array([X[i + 1, j], Y[i + 1, j], Z[i + 1, j]])
+                for va, vb, vc in [(v1, v2, v3), (v1, v3, v4)]:
+                    n = np.cross(vb - va, vc - va)
+                    mg = np.linalg.norm(n)
+                    n = n / mg if mg > 0 else n
+                    f.write(f"  facet normal {n[0]:.6e} {n[1]:.6e} {n[2]:.6e}\n")
+                    f.write("    outer loop\n")
+                    f.write(f"      vertex {va[0]:.6e} {va[1]:.6e} {va[2]:.6e}\n")
+                    f.write(f"      vertex {vb[0]:.6e} {vb[1]:.6e} {vb[2]:.6e}\n")
+                    f.write(f"      vertex {vc[0]:.6e} {vc[1]:.6e} {vc[2]:.6e}\n")
+                    f.write("    endloop\n  endfacet\n")
+        f.write("endsolid TrackMesh\n")
+    print(f"  Exported STL: {filename}")
+
+
+def create_blender_script(obj_filename, output_dir):
+    """Generate a Blender Python script for PBR rendering."""
+    import os
+
+    script_path = obj_filename.replace(".obj", "_blender.py")
+    script = f'''"""
+Blender script — TrackLab
+Usage: blender --background --python {os.path.basename(script_path)}
+"""
+import bpy, os, math
+bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
+bpy.ops.import_scene.obj(filepath=r"{obj_filename}")
+track = bpy.context.selected_objects[0]; track.name = "ProtonTrack"
+bpy.ops.object.shade_smooth()
+sub = track.modifiers.new("Subdivision", "SUBSURF"); sub.levels = 2; sub.render_levels = 3
+mat = bpy.data.materials.new("TrackMaterial"); mat.use_nodes = True
+nodes = mat.node_tree.nodes; links = mat.node_tree.links; nodes.clear()
+out = nodes.new("ShaderNodeOutputMaterial"); prin = nodes.new("ShaderNodeBsdfPrincipled")
+prin.inputs["Base Color"].default_value = (0.9,0.9,0.95,1.0)
+prin.inputs["Roughness"].default_value  = 0.3
+prin.inputs["IOR"].default_value        = 1.504
+prin.inputs["Transmission"].default_value = 0.8
+links.new(prin.outputs["BSDF"], out.inputs["Surface"])
+track.data.materials.clear(); track.data.materials.append(mat)
+bpy.ops.object.camera_add(location=(50,-50,30))
+cam = bpy.context.object; cam.rotation_euler=(math.radians(60),0,math.radians(45))
+c = cam.constraints.new("TRACK_TO"); c.target=track; c.track_axis="TRACK_NEGATIVE_Z"; c.up_axis="UP_Y"
+bpy.context.scene.camera = cam
+for pos,en in [((30,-30,40),500),((-20,-20,20),200),((0,30,30),300)]:
+    bpy.ops.object.light_add(type="AREA",location=pos); bpy.context.object.data.energy=en
+scene = bpy.context.scene; scene.render.engine="CYCLES"; scene.cycles.samples=128
+scene.render.resolution_x=1920; scene.render.resolution_y=1080; scene.render.film_transparent=True
+os.makedirs(r"{output_dir}", exist_ok=True)
+scene.render.filepath=os.path.join(r"{output_dir}","track_render.png")
+bpy.ops.render.render(write_still=True); print("Render complete.")
+'''
+    with open(script_path, "w", encoding="utf-8") as f:
+        f.write(script)
+    print(f"  Blender script: {script_path}")
+    print(f"    Run: blender --background --python {script_path}")
 
 
 def run_mode6_lut(csv_path=None):
