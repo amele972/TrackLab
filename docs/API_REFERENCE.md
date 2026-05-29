@@ -102,3 +102,16 @@ Fast Look-Up Table queries for batch processing.
 - `.query(energy, angle)` — High-speed bicubic interpolation
 - `.inverse_lookup(major, minor)` — Energy/Angle estimation
 - `.process_fluka_file(path)` — Convert physics spectra to geom distributions
+
+---
+
+### `tracklab.mode_use`
+
+Utility functions for mesh generation, subdivision, ambient occlusion, and CAD exports.
+
+**Functions:**
+- `subdivide_mesh(X, Y, Z, subdivisions=1) -> (X_sub, Y_sub, Z_sub)` — Smoothens analytical Z-slice surfaces by subdividing mesh quads.
+- `calculate_ambient_occlusion(X, Y, Z, samples=16, radius=2.0) -> array` — Computes face-level ambient occlusion factors for depth shading.
+- `export_to_obj(X, Y, Z, filepath, brightness=None)` — Exports 3D track mesh to Wavefront OBJ format with vertex color/brightness mappings.
+- `export_to_stl(X, Y, Z, filepath)` — Exports 3D track mesh to stereolithography STL format.
+- `create_blender_script(obj_filepath, output_dir)` — Generates a Python script for automated, high-quality rendering in Blender.
