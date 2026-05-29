@@ -59,7 +59,7 @@ calculate_track_parameters(
     ion: str = None,        # 'protons', 'alpha', 'Li', 'C', 'O'
     vt_model = None,        # VTMultiIonModel
     debug: bool = False,
-) → dict
+) -> dict
 ```
 
 **Returns dict with standardized English keys:**
@@ -89,7 +89,7 @@ track_optics_p_optimized(
     condenser_na=0.25,      # Illumination aperture
     n_cone_rays=32,         # Searing resolution
     ...
-) → (black_part, total_surface, projected_surface, ...)
+) -> (black_part, total_surface, projected_surface, ...)
 ```
 
 ---

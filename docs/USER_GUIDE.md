@@ -4,10 +4,11 @@
 
 ```bash
 # Clone and enter directory
-cd tracklab_unified
+git clone https://github.com/amele972/TrackLab.git
+cd TrackLab
 
-# Install required dependencies (PyQt6, NumPy, SciPy, Pandas)
-pip install -r requirements.txt
+# Install required dependencies in editable mode
+pip install -e ".[dev]"
 ```
 
 ## 🚀 Execution

@@ -4,27 +4,32 @@ param_panel.py — TrackLab v1.0 Shared Parameter Panel
 Left-side panel with shared ion/energy/angle/VB/time controls.
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
-    QDoubleSpinBox, QFrame, QGroupBox,
-)
-from PyQt6.QtGui import QFont
 from PyQt6.QtCore import pyqtSignal
-    
-from tracklab.config import SUPPORTED_IONS, VB_BY_ION, TIME_ETCHING
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDoubleSpinBox,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
+
+from tracklab.config import SUPPORTED_IONS, TIME_ETCHING, VB_BY_ION
 
 
 class ParamPanel(QWidget):
     """Shared parameter panel for all modes."""
 
-    ion_changed    = pyqtSignal(str)
+    ion_changed = pyqtSignal(str)
     params_changed = pyqtSignal()
-    theme_changed  = pyqtSignal(str)
+    theme_changed = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedWidth(280)
-        self._theme = 'light'
+        self._theme = "light"
         self._init_ui()
 
     def _init_ui(self):
@@ -34,14 +39,15 @@ class ParamPanel(QWidget):
 
         # Title
         title = QLabel("⚛  TrackLab v1.0")
-        f = QFont(); f.setBold(True); f.setPointSize(13)
+        f = QFont()
+        f.setBold(True)
+        f.setPointSize(13)
         title.setFont(f)
         title.setStyleSheet("color: #89b4fa; margin-bottom: 8px;")
         layout.addWidget(title)
 
         subtitle = QLabel("Unified Multi-Ion Track Detector")
-        subtitle.setStyleSheet("color: #a6adc8; font-size: 11px; "
-                               "margin-bottom: 12px;")
+        subtitle.setStyleSheet("color: #a6adc8; font-size: 11px; margin-bottom: 12px;")
         layout.addWidget(subtitle)
 
         # ─── Ion Selection ───
@@ -52,7 +58,7 @@ class ParamPanel(QWidget):
         row.addWidget(QLabel("Ion:"))
         self.ion_combo = QComboBox()
         self.ion_combo.addItems(SUPPORTED_IONS)
-        self.ion_combo.setCurrentText('protons')
+        self.ion_combo.setCurrentText("protons")
         self.ion_combo.currentTextChanged.connect(self._on_ion_changed)
         row.addWidget(self.ion_combo)
         ig_layout.addLayout(row)
@@ -65,10 +71,10 @@ class ParamPanel(QWidget):
 
         self._spins = {}
         for label, key, default, lo, hi, decimals in [
-            ("Energy (MeV):", "energy", 1.5,  0.01, 1000, 3),
-            ("Angle (°):",    "angle",  75.0, 0.0,  90.0, 1),
-            ("VB (µm/h):",    "vb",     4.7,  0.01, 20.0, 3),
-            ("Time (h):",     "time",   TIME_ETCHING, 0.01, 100.0, 3),
+            ("Energy (MeV):", "energy", 1.5, 0.01, 1000, 3),
+            ("Angle (°):", "angle", 75.0, 0.0, 90.0, 1),
+            ("VB (µm/h):", "vb", 4.7, 0.01, 20.0, 3),
+            ("Time (h):", "time", TIME_ETCHING, 0.01, 100.0, 3),
         ]:
             row = QHBoxLayout()
             lbl = QLabel(label)
@@ -98,13 +104,14 @@ class ParamPanel(QWidget):
         # ─── Status ───
         self.status_label = QLabel("Ready")
         self.status_label.setStyleSheet(
-            "color: #a6adc8; font-size: 10px; padding: 4px;")
+            "color: #a6adc8; font-size: 10px; padding: 4px;"
+        )
         layout.addWidget(self.status_label)
 
     def _on_ion_changed(self, ion_name):
         """Update VB to ion-specific default."""
         vb = VB_BY_ION.get(ion_name, 1.73)
-        self._spins['vb'].setValue(vb)
+        self._spins["vb"].setValue(vb)
         self._update_vb_info()
         self.ion_changed.emit(ion_name)
 
@@ -114,8 +121,7 @@ class ParamPanel(QWidget):
     def _update_vb_info(self):
         ion = self.ion_combo.currentText()
         vb = VB_BY_ION.get(ion, 4.7)
-        self.vb_info.setText(
-            f"Default VB for {ion}: {vb:.2f} µm/h")
+        self.vb_info.setText(f"Default VB for {ion}: {vb:.2f} µm/h")
 
     # ─── Public API ───
     @property
@@ -124,28 +130,28 @@ class ParamPanel(QWidget):
 
     @property
     def energy(self):
-        return self._spins['energy'].value()
+        return self._spins["energy"].value()
 
     @property
     def angle(self):
-        return self._spins['angle'].value()
+        return self._spins["angle"].value()
 
     @property
     def vb(self):
-        return self._spins['vb'].value()
+        return self._spins["vb"].value()
 
     @property
     def time(self):
-        return self._spins['time'].value()
+        return self._spins["time"].value()
 
     def get_params(self):
         """Return dict of all current parameters."""
         return {
-            'ion':    self.ion,
-            'energy': self.energy,
-            'angle':  self.angle,
-            'vb':     self.vb,
-            'time':   self.time,
+            "ion": self.ion,
+            "energy": self.energy,
+            "angle": self.angle,
+            "vb": self.vb,
+            "time": self.time,
         }
 
     def set_status(self, text):

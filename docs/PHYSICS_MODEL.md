@@ -1,111 +1,103 @@
-# TrackLab v1.0 — Physics Model
+# TrackLab — Physical and Optical Models
 
-## Overview
+TrackLab simulates the physical formation and chemical etching of charged particle tracks in poly-allyl diglycol carbonate (PADC) detectors, commercially known as CR-39, and models their visual appearance under a transmission optical microscope.
 
-TrackLab models the chemical etching of nuclear tracks in CR-39 
-(poly-allyl-diglycol carbonate) solid-state nuclear track detectors.
+---
 
-When a charged particle traverses CR-39, it creates a trail of radiation damage.
-During chemical etching (typically NaOH at 70°C), the damaged material dissolves
-faster than the undamaged bulk, revealing the track as an etch pit observable
-under an optical microscope.
+## 1. Track Structure Generation
 
-## Key Physical Quantities
+The generation of the 3D track structure in TrackLab proceeds through the following computational steps:
 
-### Bulk Etch Rate VB (µm/h)
+### A. Range Determination from SRIM Data
+When an ion of a given initial energy $E$ enters the detector, its projected range $R(E)$ represents the total trajectory length. TrackLab loads precomputed range-energy tables derived from SRIM (Stopping and Range of Ions in Matter) databases:
+1. The package reads `Rang_CR_all_ions_SRIM.dat` which contains range tables for all supported ions (protons, alpha particles, lithium, carbon, oxygen).
+2. The ranges are evaluated at run-time using a monotone piecewise cubic Hermite interpolating polynomial (PCHIP) to avoid non-physical oscillations.
+3. If the ion energy exceeds the database range, the range is extended using the Bragg-Kleeman power law:
+   $$R(E) = a \cdot E^{p}$$
+   where $p \approx 1.77$ for protons and light ions.
 
-The rate at which undamaged detector material is dissolved. This is **constant**
-for a given etching session (depends on NaOH concentration, temperature, detector batch).
+### B. The Etch Rate Ratio $V(y)$ function
+Chemical etching removes the undamaged bulk detector material at a constant rate $v_B$ (bulk etch rate, $\mu\text{m/h}$). Along the particle path, radiation damage increases the local dissolution rate to $v_T$ (track etch rate, $\mu\text{m/h}$). 
 
-| Ion | Default VB (µm/h) | Notes |
-|-----|-----------|-------|
-| protons | 4.70 | Standard NaOH etching |
-| Li, C, O, alpha | 1.73 | Calibration VB for experimental datasets |
+The geometry of the etched track is governed by the reduced etch-rate ratio:
+$$V(y) = \frac{v_T(y)}{v_B} \ge 1$$
+where $y = R - x$ is the **residual range** (the remaining distance along the particle trajectory to its stopping point, where $x$ is the coordinate along the track axis).
 
-### Track Etch Rate VT(y) (µm/h)
+TrackLab implements distinct $V(y)$ parameterizations for different ion species:
 
-The rate at which damaged material along the track is dissolved. VT depends on
-the local radiation damage density, which varies along the track.
+#### Proton Model (Nikezi&cacute; / Hermsdorf)
+For protons, the standard formulation is a double-exponential fit:
+$$V(y) = 1 + \left(a_1 e^{-a_2 y} + a_3 e^{-a_4 y}\right)\left(1 - e^{-a_5 y}\right)$$
+This satisfies the boundary condition $V(0) = 1$ (the track etch rate equals the bulk etch rate at the stopping point). The standard parameters are:
+$$a_1 = 0.4306, \quad a_2 = 0.00737, \quad a_3 = 1.0559, \quad a_4 = 0.1072, \quad a_5 = 1.412$$
 
-`y = R - x` is the **residual range** (µm), where R is the total projected range 
-and x is the distance etched from the surface along the track axis.
+#### Light Ion Model
+For heavier ions (Lithium, Carbon, Oxygen), a Broken Power Law (BPL) model is used to fit the experimental data:
+$$V(y) = 1 + \frac{A \cdot y^{\alpha}}{1 + \left(\frac{y}{y_0}\right)^{\alpha+\beta}}$$
+where $A$, $y_0$, $\alpha$, and $\beta$ are parameters fitted to the digitized experimental data from Dörschel et al.
 
-### Etch Rate Ratio V(y) = VT(y) / VB
+#### Helium Ion (Alpha) Models
+For alpha particles, TrackLab supports 7 alternative parameterizations from the literature (e.g., Durrani & Bull, Brun et al., Yu et al., Hermsdorf, Green et al.). The default is Brun et al. (1999):
+$$V(y) = 1 + e^{-a_1 y + a_4} - e^{-a_2 y + a_3} + e^{a_3} - e^{a_4}$$
 
-The dimensionless ratio ≥ 1 that governs all track geometry. **TrackLab v1.0 treats V(y) as the primary physical model.** All geometric dimensions are derived from this ratio.
+### C. Integrating Wavefront Propagation
+To find the position reached by the etchant along the track axis, we precompute a cumulative integration function $F(u)$ of the inverse etch-rate ratio:
+$$F(u) = \int_0^u \frac{1}{V(\xi)} d\xi$$
+The integral of the track etch rate along a segment $[u_a, u_b]$ is then efficiently computed by interpolation:
+$$\int_{u_a}^{u_b} \frac{1}{V(\xi)} d\xi = F(u_b) - F(u_a)$$
 
-## V(y) Models
+For a total etching time $t$, the etched distance $d_{\text{etch}}$ along the track is found by solving:
+$$\int_0^{d_{\text{etch}}} \frac{1}{v_T(R-x)} dx = t$$
 
-### Protons — Dorschel Analytical Model
+At any point $x \le d_{\text{etch}}$, the time $t(x)$ when the etchant first reached $x$ is:
+$$t(x) = \int_0^x \frac{1}{v_T(R-\xi)} d\xi$$
+
+The remaining etching time available for lateral growth at that point is $t_{\text{over}} = t - t(x)$. The radius of the resulting circular envelope at $x$ is:
+$$r_{\text{wall}}(x) = v_B \cdot t_{\text{over}} \cdot \cos(\delta)$$
+where $\delta = \arcsin(1/V(R-x))$ is the local critical angle.
+
+Combining the lateral spheres along the trajectory constructs the 3D track wall profile.
+
+---
+
+## 2. Microscope View and Optical Simulation
+
+The optical module simulates how light passes through the 3D track structure under transmission light microscopy to generate the final synthetic microscope image.
 
 ```
-V(y) = 1 + (a₁·exp(-a₂·y) + a₃·exp(-a₄·y)) · (1 - exp(-a₅·y))
+          [ Light Rays (Condenser Cone) ]
+                         |
+                         v
+       [ Plastic Detector (CR-39, n = 1.504) ]
+             \                       /
+              \   3D Track Mesh     /
+               \___________________/
+                         |
+                         v  Snell's Law Refraction
+                       [ Air ]
+                         |
+                         v  Objective NA Aperture Filter
+                [ Brightness Matrix ]
+                         |
+                         v
+           [ XY Microscope View Image ]
 ```
 
-Parameters (Dorschel et al., 1997) are calibrated for protons in CR-39. This model captures the behavior where V peaks near the Bragg peak (small y).
+### A. From Track Mesh to Image Space
+1. The 3D track wall profile is discretized into a 3D surface mesh containing $N_z \times N_{\alpha}$ quadrilateral faces.
+2. For each face, stable local orientation is defined by computing surface normal vectors using diagonal cross products, avoiding numerical singularities at high curvature zones (such as near the conical track tip).
+3. The detector is assumed to have a refractive index of $n_{\text{plastic}} = 1.504$ (CR-39) and is surrounded by air ($n_{\text{air}} = 1.0$).
 
-### Alpha Particles — Multiple Analytical Models
+### B. 3D Vector Snell's Law and Ray Tracing
+Light rays originating from the microscope's illumination system enter the detector from below.
+* **Vector Refraction**: For each ray with incident vector $\mathbf{I}$ hitting a mesh face with normal vector $\mathbf{N}$, the refracted ray vector $\mathbf{T}$ entering the air pocket inside the track pit is calculated using the full 3D vector form of Snell's Law:
+  $$\mathbf{T} = \eta \mathbf{I} + \left( \eta \cos(\theta_i) - \sqrt{1 - \eta^2 (1 - \cos^2(\theta_i))} \right) \mathbf{N}$$
+  where $\eta = n_{\text{plastic}}/n_{\text{air}}$ and $\cos(\theta_i) = -\mathbf{N} \cdot \mathbf{I}$.
+* **Total Internal Reflection (TIR)**: If the term inside the square root is negative, total internal reflection occurs. The ray is completely reflected back into the plastic and does not reach the microscope objective, appearing dark (black).
 
-TrackLab v1.0 supports **7 different alpha particle models** (configurable in `config.py`):
-1. **Durrani & Bull** (1987)
-2. **Brun et al.** (1999)
-3. **Yu et al.** (2005)
-4. **Al-Jubbori** (2020)
-5. **Hermsdorf** (2009)
-6. **Green et al.** (1982)
-7. **Yu et al.** (2005a,b)
+### C. Condenser Cone Averaging and Numerical Aperture Filter
+* **Condenser NA**: Instead of simulating a single vertical light ray (which results in unrealistic, sharp black/white transitions), TrackLab models the physical microscope condenser. It samples a distribution of rays (default 32 rays) within a cone defined by the Condenser Numerical Aperture ($\text{NA}_{\text{cond}} = 0.25$).
+* **Fresnel Transmittance**: For refracted rays, the transmitted intensity is scaled using the Fresnel equations, accounting for polarization and angle-dependent loss.
+* **Objective NA Filter**: Only rays that exit the track pit and fall within the collection angle of the objective lens (defined by $\text{NA}_{\text{obj}} = 0.45$) contribute to the final image brightness. Rays refracted at high angles are discarded.
 
-### Heavy Ions (Li, C, O) — Broken Power Law (BPL)
-
-```
-V(y) = 1 + A · y^α / (1 + (y/y₀)^(α+β))
-```
-
-Parameters {A, y₀, α, β} are fitted from experimental profiles stored in `Data_ions.xlsx`.
-
-## Track Geometry Calculation (Z-Slice Engine)
-
-> [!IMPORTANT]
-> **Z-Slice Parametric Geometry**: Unlike legacy versions that used angular subdivision (prone to "beak" artifacts), v1.0 uses a high-fidelity **Z-Slice logic**. The track is modeled as a solid of revolution, which is then analytically intersected with horizontal planes (Z-slices) from the surface down to the tip. This ensures perfect continuity and numerical stability even at extreme overetching.
-
-### Induction Range induct_range
-
-The distance along the track before etching begins to exceed VB:
-```
-V(R - induct_range) · sin(θ) = 1
-```
-This is found via 10-step bisection to ensure sub-µm accuracy.
-
-### Etched Distance etched_dist
-
-The distance along the track that has been etched in time t:
-```
-∫₀^etched_dist 1/VT(R-x) dx = t
-```
-
-### Track Wall Profile
-
-At each position x along the etched segment, the track wall radius is:
-```
-wall_r(x) = overetch · cos(δ)
-```
-where δ = arcsin(1/V(R-x)).
-
-### Major/Minor Axes and Depth
-
-- **Major Axis**: The longest dimension of the track opening on the detector surface.
-- **Minor Axis**: The width of the opening perpendicular to the major axis.
-- **Depth**: The maximum absolute penetration below the **etched surface**. 
-
-> [!TIP]
-> **Surface Anchoring**: v1.0 automatically anchors simulated tracks to the minimum depth of experimental data, ensuring that the simulated "z=0" plane perfectly matches the experimental detector surface.
-
-## Optical Model (v2.0)
-
-Track brightness is computed using 3D vector ray-tracing:
-1. **Z-Slice mesh generation** (N_z × N_alpha quads)
-2. **Face normals** via diagonal cross products (stable at the tip)
-3. **Snell's Law** refraction at the CR-39/air interface
-4. **Obliquity-corrected Fresnel transmittance** (DEO formula)
-5. **Condenser Cone Averaging**: Simulates real illumination by averaging 32 rays per face across the condenser NA.
-6. **Projected Surface**: Area-weighted sum of transmittance used for integrated optical density calculations.
+Averaging the transmitted intensities of all cone rays for each mesh face yields the **Brightness Matrix**, which is then mapped to the 2D XY plane to render a high-fidelity synthetic microscope image.

@@ -4,20 +4,33 @@ tab_reference.py — Mode 3: Reference Dataset Generation
 Energy × Angle sweep with 3D surfaces, for any ion.
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QDoubleSpinBox, QSpinBox, QProgressBar, QTableWidget,
-    QTableWidgetItem, QFrame, QHeaderView, QMessageBox,
-    QFileDialog, QTabWidget, QComboBox,
-)
-from PyQt6.QtGui import QFont
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-import numpy as np
 import csv
 
-from .workers import BatchWorker
+import numpy as np
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDoubleSpinBox,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
 from .styles import get_plot_colors
+from .workers import BatchWorker
 
 
 class ReferenceTab(QWidget):
@@ -26,10 +39,10 @@ class ReferenceTab(QWidget):
     def __init__(self, param_panel):
         super().__init__()
         self.param_panel = param_panel
-        self.worker  = None
+        self.worker = None
         self.results = []
         self.energies = []
-        self.angles   = []
+        self.angles = []
         self._init_ui()
         self.param_panel.theme_changed.connect(self._on_theme_changed)
 
@@ -38,8 +51,8 @@ class ReferenceTab(QWidget):
 
     def _on_theme_changed(self, theme):
         c = self._colors()
-        self.plot3d_fig.patch.set_facecolor(c['bg'])
-        self.analysis_fig.patch.set_facecolor(c['bg'])
+        self.plot3d_fig.patch.set_facecolor(c["bg"])
+        self.analysis_fig.patch.set_facecolor(c["bg"])
         if self.results:
             self._plot_3d_surfaces()
             self._plot_analysis()
@@ -53,7 +66,9 @@ class ReferenceTab(QWidget):
         layout.setSpacing(10)
 
         header = QLabel("Mode 3 — Reference Dataset Generation")
-        f = QFont(); f.setBold(True); f.setPointSize(12)
+        f = QFont()
+        f.setBold(True)
+        f.setPointSize(12)
         header.setFont(f)
         header.setStyleSheet("color: #89b4fa;")
         layout.addWidget(header)
@@ -63,11 +78,13 @@ class ReferenceTab(QWidget):
 
         ion_row.addWidget(QLabel("Ion:"))
         self.ion_combo = QComboBox()
-        self.ion_combo.addItems(['protons', 'alpha', 'Li', 'C', 'O'])
+        self.ion_combo.addItems(["protons", "alpha", "Li", "C", "O"])
         self.ion_combo.setCurrentText(
-            self.param_panel.ion if hasattr(self.param_panel, 'ion') else 'protons')
+            self.param_panel.ion if hasattr(self.param_panel, "ion") else "protons"
+        )
         self.ion_combo.setToolTip(
-            "Ion species for this reference dataset. Independent of Mode 2 settings.")
+            "Ion species for this reference dataset. Independent of Mode 2 settings."
+        )
         self.ion_combo.currentTextChanged.connect(self._on_ion_changed)
         ion_row.addWidget(self.ion_combo)
 
@@ -77,10 +94,12 @@ class ReferenceTab(QWidget):
         self.vb_local.setDecimals(3)
         self.vb_local.setSingleStep(0.05)
         self.vb_local.setValue(
-            self.param_panel.vb if hasattr(self.param_panel, 'vb') else 1.73)
+            self.param_panel.vb if hasattr(self.param_panel, "vb") else 1.73
+        )
         self.vb_local.setToolTip(
             "Bulk etch rate for this dataset. Typical: 1.73 µm/h (CR-39 NTD), "
-            "4.7 µm/h (proton standard).")
+            "4.7 µm/h (proton standard)."
+        )
         ion_row.addWidget(self.vb_local)
 
         ion_row.addWidget(QLabel("  Etching time (h):"))
@@ -89,7 +108,8 @@ class ReferenceTab(QWidget):
         self.time_local.setDecimals(2)
         self.time_local.setSingleStep(0.5)
         self.time_local.setValue(
-            self.param_panel.time if hasattr(self.param_panel, 'time') else 2.83)
+            self.param_panel.time if hasattr(self.param_panel, "time") else 2.83
+        )
         self.time_local.setToolTip("Total etching time for track development.")
         ion_row.addWidget(self.time_local)
 
@@ -104,20 +124,23 @@ class ReferenceTab(QWidget):
         ]:
             grid_row.addWidget(QLabel(f"{label} min:"))
             s_min = QDoubleSpinBox()
-            s_min.setValue(lo_val); s_min.setRange(0.0, 1000)
-            setattr(self, f'{attr}_min', s_min)
+            s_min.setValue(lo_val)
+            s_min.setRange(0.0, 1000)
+            setattr(self, f"{attr}_min", s_min)
             grid_row.addWidget(s_min)
 
             grid_row.addWidget(QLabel("max:"))
             s_max = QDoubleSpinBox()
-            s_max.setValue(hi_val); s_max.setRange(0.0, 1000)
-            setattr(self, f'{attr}_max', s_max)
+            s_max.setValue(hi_val)
+            s_max.setRange(0.0, 1000)
+            setattr(self, f"{attr}_max", s_max)
             grid_row.addWidget(s_max)
 
             grid_row.addWidget(QLabel("pts:"))
             s_pts = QSpinBox()
-            s_pts.setValue(steps_val); s_pts.setRange(2, 200)
-            setattr(self, f'{attr}_steps', s_pts)
+            s_pts.setValue(steps_val)
+            s_pts.setRange(2, 200)
+            setattr(self, f"{attr}_steps", s_pts)
             grid_row.addWidget(s_pts)
 
         self.gen_btn = QPushButton("Generate")
@@ -145,7 +168,7 @@ class ReferenceTab(QWidget):
         # Stats
         stats_row = QHBoxLayout()
         self.val_developed = self._stat_card("Developed", stats_row)
-        self.val_total     = self._stat_card("Total", stats_row)
+        self.val_total = self._stat_card("Total", stats_row)
         layout.addLayout(stats_row)
 
         # Result tabs
@@ -155,15 +178,17 @@ class ReferenceTab(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels(
-            ["Ion", "E (MeV)", "A (°)", "Depth", "Major", "Minor", "Status"])
+            ["Ion", "E (MeV)", "A (°)", "Depth", "Major", "Minor", "Status"]
+        )
         self.table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch)
+            QHeaderView.ResizeMode.Stretch
+        )
         self.tabs.addTab(self.table, "Data Table")
 
         # 3D surfaces
         c = self._colors()
         self.plot3d_fig = Figure(figsize=(10, 5), dpi=100)
-        self.plot3d_fig.patch.set_facecolor(c['bg'])
+        self.plot3d_fig.patch.set_facecolor(c["bg"])
         self.plot3d = FigureCanvasQTAgg(self.plot3d_fig)
         self.tabs.addTab(self.plot3d, "3D Surfaces")
 
@@ -173,12 +198,13 @@ class ReferenceTab(QWidget):
         ctrl_row = QHBoxLayout()
         ctrl_row.addWidget(QLabel("Slice at angle (°):"))
         self.analysis_angle = QDoubleSpinBox()
-        self.analysis_angle.setValue(90.0); self.analysis_angle.setRange(0, 90)
+        self.analysis_angle.setValue(90.0)
+        self.analysis_angle.setRange(0, 90)
         ctrl_row.addWidget(self.analysis_angle)
         ctrl_row.addStretch()
         al.addLayout(ctrl_row)
         self.analysis_fig = Figure(figsize=(10, 5), dpi=100)
-        self.analysis_fig.patch.set_facecolor(c['bg'])
+        self.analysis_fig.patch.set_facecolor(c["bg"])
         self.analysis_canvas = FigureCanvasQTAgg(self.analysis_fig)
         al.addWidget(self.analysis_canvas)
         self.tabs.addTab(analysis_widget, "Analysis")
@@ -191,9 +217,11 @@ class ReferenceTab(QWidget):
         layout.addWidget(export_btn)
 
     def _stat_card(self, label_text, parent_layout):
-        card = QFrame(); card.setProperty("type", "panel")
+        card = QFrame()
+        card.setProperty("type", "panel")
         card.setFixedHeight(55)
-        v = QVBoxLayout(card); v.setContentsMargins(10, 6, 10, 6)
+        v = QVBoxLayout(card)
+        v.setContentsMargins(10, 6, 10, 6)
         v.addWidget(QLabel(label_text))
         val_lbl = QLabel("0")
         val_lbl.setStyleSheet("font-weight: bold; color: #89b4fa;")
@@ -204,11 +232,11 @@ class ReferenceTab(QWidget):
     def _on_ion_changed(self, ion_name):
         """Auto-fill sensible VB default when the ion changes."""
         defaults = {
-            'protons': 1.73,
-            'alpha':   1.73,
-            'Li':      1.73,
-            'C':       1.73,
-            'O':       1.73,
+            "protons": 1.73,
+            "alpha": 1.73,
+            "Li": 1.73,
+            "C": 1.73,
+            "O": 1.73,
         }
         self.vb_local.setValue(defaults.get(ion_name, 1.73))
 
@@ -217,15 +245,15 @@ class ReferenceTab(QWidget):
         self.cancel_btn.setEnabled(True)
 
         params = {
-            'ion':     self.ion_combo.currentText(),
-            'e_min':   self.e_min.value(),
-            'e_max':   self.e_max.value(),
-            'e_steps': self.e_steps.value(),
-            'a_min':   self.a_min.value(),
-            'a_max':   self.a_max.value(),
-            'a_steps': self.a_steps.value(),
-            'vb':      self.vb_local.value(),
-            'time':    self.time_local.value(),
+            "ion": self.ion_combo.currentText(),
+            "e_min": self.e_min.value(),
+            "e_max": self.e_max.value(),
+            "e_steps": self.e_steps.value(),
+            "a_min": self.a_min.value(),
+            "a_max": self.a_max.value(),
+            "a_steps": self.a_steps.value(),
+            "vb": self.vb_local.value(),
+            "time": self.time_local.value(),
         }
         self.worker = BatchWorker(params)
         self.worker.progress.connect(self.progress_bar.setValue)
@@ -241,23 +269,23 @@ class ReferenceTab(QWidget):
         self._reset()
 
     def _on_done(self, data):
-        self.results  = data['results']
-        self.energies = np.array(data['energies'])
-        self.angles   = np.array(data['angles'])
+        self.results = data["results"]
+        self.energies = np.array(data["energies"])
+        self.angles = np.array(data["angles"])
 
-        self.val_developed.setText(str(data['developed']))
-        self.val_total.setText(str(data['total']))
+        self.val_developed.setText(str(data["developed"]))
+        self.val_total.setText(str(data["total"]))
 
         # Fill table
         self.table.setRowCount(min(100, len(self.results)))
         for i, r in enumerate(self.results[:100]):
-            self.table.setItem(i, 0, QTableWidgetItem(r.get('ion', '')))
+            self.table.setItem(i, 0, QTableWidgetItem(r.get("ion", "")))
             self.table.setItem(i, 1, QTableWidgetItem(f"{r['energy_MeV']:.2f}"))
             self.table.setItem(i, 2, QTableWidgetItem(f"{r['angle_deg']:.1f}"))
             self.table.setItem(i, 3, QTableWidgetItem(f"{r['depth_um']:.3f}"))
             self.table.setItem(i, 4, QTableWidgetItem(f"{r['major_axis_um']:.3f}"))
             self.table.setItem(i, 5, QTableWidgetItem(f"{r['minor_axis_um']:.3f}"))
-            self.table.setItem(i, 6, QTableWidgetItem(r['status']))
+            self.table.setItem(i, 6, QTableWidgetItem(r["status"]))
 
         self._plot_3d_surfaces()
         self.analysis_angle.valueChanged.connect(self._plot_analysis)
@@ -280,23 +308,26 @@ class ReferenceTab(QWidget):
         major_grid = np.zeros((n_a, n_e))
 
         for r in self.results:
-            e_idx = np.argmin(np.abs(self.energies - r['energy_MeV']))
-            a_idx = np.argmin(np.abs(self.angles - r['angle_deg']))
-            minor_grid[a_idx, e_idx] = r['minor_axis_um']
-            major_grid[a_idx, e_idx] = r['major_axis_um']
+            e_idx = np.argmin(np.abs(self.energies - r["energy_MeV"]))
+            a_idx = np.argmin(np.abs(self.angles - r["angle_deg"]))
+            minor_grid[a_idx, e_idx] = r["minor_axis_um"]
+            major_grid[a_idx, e_idx] = r["major_axis_um"]
 
         self.plot3d_fig.clear()
         c = self._colors()
-        self.plot3d_fig.patch.set_facecolor(c['bg'])
+        self.plot3d_fig.patch.set_facecolor(c["bg"])
         E, A = np.meshgrid(self.energies, self.angles)
-        for idx, (grid, label) in enumerate([
-            (minor_grid, 'Minor Axis (µm)'),
-            (major_grid, 'Major Axis (µm)'),
-        ]):
-            ax = self.plot3d_fig.add_subplot(1, 2, idx + 1, projection='3d')
-            ax.plot_surface(E, A, grid, cmap='plasma', alpha=0.85)
-            ax.set_xlabel('E (MeV)'); ax.set_ylabel('Angle (°)')
-            ax.set_title(label, color=c['text'])
+        for idx, (grid, label) in enumerate(
+            [
+                (minor_grid, "Minor Axis (µm)"),
+                (major_grid, "Major Axis (µm)"),
+            ]
+        ):
+            ax = self.plot3d_fig.add_subplot(1, 2, idx + 1, projection="3d")
+            ax.plot_surface(E, A, grid, cmap="plasma", alpha=0.85)
+            ax.set_xlabel("E (MeV)")
+            ax.set_ylabel("Angle (°)")
+            ax.set_title(label, color=c["text"])
         self.plot3d_fig.tight_layout()
         self.plot3d.draw()
 
@@ -307,29 +338,48 @@ class ReferenceTab(QWidget):
         a_idx = np.argmin(np.abs(self.angles - target))
         actual = self.angles[a_idx]
 
-        pairs = [(r['energy_MeV'], r['major_axis_um'], r['minor_axis_um'])
-                 for r in self.results if abs(r['angle_deg'] - actual) < 0.5]
+        pairs = [
+            (r["energy_MeV"], r["major_axis_um"], r["minor_axis_um"])
+            for r in self.results
+            if abs(r["angle_deg"] - actual) < 0.5
+        ]
         if not pairs:
             return
         pairs.sort()
 
         c = self._colors()
         self.analysis_fig.clear()
-        self.analysis_fig.patch.set_facecolor(c['bg'])
+        self.analysis_fig.patch.set_facecolor(c["bg"])
         ax = self.analysis_fig.add_subplot(111)
-        ax.set_facecolor(c['axes_bg'])
-        ax.plot([p[0] for p in pairs], [p[1] for p in pairs],
-                'o-', color=c['accent'], lw=2, ms=5, label='Major Axis')
-        ax.plot([p[0] for p in pairs], [p[2] for p in pairs],
-                's-', color=c['accent2'], lw=2, ms=5, label='Minor Axis')
-        ax.set_xlabel('Energy (MeV)', color=c['text'])
-        ax.set_ylabel('Axis Length (µm)', color=c['text'])
-        ax.set_title(f'Axes vs Energy at {actual:.1f}°',
-                     color=c['text'], fontweight='bold')
-        ax.tick_params(colors=c['muted'])
-        ax.legend(facecolor=c['legend_bg'], edgecolor=c['legend_edge'],
-                  labelcolor=c['text'])
-        ax.grid(True, alpha=0.2, color=c['grid'])
+        ax.set_facecolor(c["axes_bg"])
+        ax.plot(
+            [p[0] for p in pairs],
+            [p[1] for p in pairs],
+            "o-",
+            color=c["accent"],
+            lw=2,
+            ms=5,
+            label="Major Axis",
+        )
+        ax.plot(
+            [p[0] for p in pairs],
+            [p[2] for p in pairs],
+            "s-",
+            color=c["accent2"],
+            lw=2,
+            ms=5,
+            label="Minor Axis",
+        )
+        ax.set_xlabel("Energy (MeV)", color=c["text"])
+        ax.set_ylabel("Axis Length (µm)", color=c["text"])
+        ax.set_title(
+            f"Axes vs Energy at {actual:.1f}°", color=c["text"], fontweight="bold"
+        )
+        ax.tick_params(colors=c["muted"])
+        ax.legend(
+            facecolor=c["legend_bg"], edgecolor=c["legend_edge"], labelcolor=c["text"]
+        )
+        ax.grid(True, alpha=0.2, color=c["grid"])
         self.analysis_fig.tight_layout()
         self.analysis_canvas.draw()
 
@@ -337,12 +387,11 @@ class ReferenceTab(QWidget):
         if not self.results:
             QMessageBox.warning(self, "No Data", "Generate first.")
             return
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Save CSV", "", "CSV (*.csv)")
+        path, _ = QFileDialog.getSaveFileName(self, "Save CSV", "", "CSV (*.csv)")
         if not path:
             return
         try:
-            with open(path, 'w', newline='') as f:
+            with open(path, "w", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=self.results[0].keys())
                 writer.writeheader()
                 writer.writerows(self.results)

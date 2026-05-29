@@ -1,40 +1,38 @@
-"""Test that all GUI module imports work."""
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+"""Pytest gui imports check for TrackLab."""
 
-print("Testing GUI imports...")
+def test_gui_imports():
+    """Verify that all components of the GUI sub-package import successfully."""
+    from tracklab.gui.styles import STYLESHEET
+    assert STYLESHEET is not None
 
-from tracklab.gui.styles import STYLESHEET
-print("  styles.py OK")
+    from tracklab.gui.param_panel import ParamPanel
+    assert ParamPanel is not None
 
-from tracklab.gui.param_panel import ParamPanel
-print("  param_panel.py OK")
+    from tracklab.gui.workers import TrackWorker, BatchWorker, FlukaWorker
+    assert TrackWorker is not None
+    assert BatchWorker is not None
+    assert FlukaWorker is not None
 
-from tracklab.gui.workers import TrackWorker, BatchWorker, FlukaWorker
-print("  workers.py OK")
+    from tracklab.gui.tab_vy_curve import VyCurveTab
+    assert VyCurveTab is not None
 
-from tracklab.gui.tab_vy_curve import VyCurveTab
-print("  tab_vy_curve.py OK")
+    from tracklab.gui.tab_single_track import SingleTrackTab
+    assert SingleTrackTab is not None
 
-from tracklab.gui.tab_single_track import SingleTrackTab
-print("  tab_single_track.py OK")
+    from tracklab.gui.tab_reference import ReferenceTab
+    assert ReferenceTab is not None
 
-from tracklab.gui.tab_reference import ReferenceTab
-print("  tab_reference.py OK")
+    from tracklab.gui.tab_fluka import FlukaTab
+    assert FlukaTab is not None
 
-from tracklab.gui.tab_fluka import FlukaTab
-print("  tab_fluka.py OK")
+    from tracklab.gui.tab_3d_enhanced import Enhanced3DTab
+    assert Enhanced3DTab is not None
 
-from tracklab.gui.tab_3d_enhanced import Enhanced3DTab
-print("  tab_3d_enhanced.py OK")
+    from tracklab.gui.tab_lut import LUTTab
+    assert LUTTab is not None
 
-from tracklab.gui.tab_lut import LUTTab
-print("  tab_lut.py OK")
+    from tracklab.gui.tab_config import ConfigTab
+    assert ConfigTab is not None
 
-from tracklab.gui.tab_config import ConfigTab
-print("  tab_config.py OK")
-
-from tracklab.gui.main_window import TrackVisionMainWindow
-print("  main_window.py OK")
-
-print("\nAll GUI imports successful!")
+    from tracklab.gui.main_window import TrackLabMainWindow
+    assert TrackLabMainWindow is not None

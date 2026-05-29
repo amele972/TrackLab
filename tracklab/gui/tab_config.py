@@ -3,18 +3,33 @@ tab_config.py — Mode 7: System Configuration
 ===============================================
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QDoubleSpinBox, QTabWidget, QGroupBox, QTableWidget,
-    QTableWidgetItem, QHeaderView, QMessageBox, QFrame,
-    QComboBox,
-)
 from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDoubleSpinBox,
+    QFrame,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from tracklab.config import (
-    VB_BY_ION, N_PLASTIC, MICROSCOPE_NA, CONDENSER_NA,
-    TIME_ETCHING, SUPPORTED_IONS, OPTICS_MODEL,
-    ALPHA_VT_MODEL, ALPHA_MODELS_INFO
+    ALPHA_MODELS_INFO,
+    ALPHA_VT_MODEL,
+    CONDENSER_NA,
+    MICROSCOPE_NA,
+    N_PLASTIC,
+    OPTICS_MODEL,
+    SUPPORTED_IONS,
+    TIME_ETCHING,
+    VB_BY_ION,
 )
 
 
@@ -32,12 +47,15 @@ class ConfigTab(QWidget):
         layout.setSpacing(12)
 
         # ── Settings panel ───
-        settings = QFrame(); settings.setProperty("type", "card")
+        settings = QFrame()
+        settings.setProperty("type", "card")
         sl = QVBoxLayout(settings)
         sl.setContentsMargins(16, 16, 16, 16)
 
         title = QLabel("System Configuration")
-        f = QFont(); f.setBold(True); f.setPointSize(12)
+        f = QFont()
+        f.setBold(True)
+        f.setPointSize(12)
         title.setFont(f)
         title.setStyleSheet("color: #89b4fa;")
         sl.addWidget(title)
@@ -51,7 +69,8 @@ class ConfigTab(QWidget):
         self.vb_table = QTableWidget(len(SUPPORTED_IONS), 2)
         self.vb_table.setHorizontalHeaderLabels(["Ion", "VB (µm/h)"])
         self.vb_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch)
+            QHeaderView.ResizeMode.Stretch
+        )
         for i, ion in enumerate(SUPPORTED_IONS):
             self.vb_table.setItem(i, 0, QTableWidgetItem(ion))
             item = QTableWidgetItem(f"{VB_BY_ION.get(ion, 4.7):.3f}")
@@ -71,12 +90,14 @@ class ConfigTab(QWidget):
         ]:
             row = QHBoxLayout()
             row.addWidget(QLabel(label))
-            s = QDoubleSpinBox(); s.setValue(val); s.setDecimals(4)
+            s = QDoubleSpinBox()
+            s.setValue(val)
+            s.setDecimals(4)
             s.setRange(0.001, 5.0)
             self._opt_spins[key] = s
             row.addWidget(s)
             ol.addLayout(row)
-        
+
         # New Optics Engine selection
         fid_row = QHBoxLayout()
         fid_row.addWidget(QLabel("Model Fidelity (Ray-Trace):"))
@@ -86,7 +107,7 @@ class ConfigTab(QWidget):
         self.optics_combo.setCurrentIndex(1 if OPTICS_MODEL == "full_trace" else 0)
         fid_row.addWidget(self.optics_combo)
         ol.addLayout(fid_row)
-        
+
         ol.addStretch()
         tabs.addTab(opt_tab, "Optical")
 
@@ -96,12 +117,14 @@ class ConfigTab(QWidget):
         el.addWidget(QLabel("Default Etching Parameters"))
         self._etch_spins = {}
         for label, key, val in [
-            ("Default VB (µm/h):", "vb", VB_BY_ION.get('protons', 4.7)),
+            ("Default VB (µm/h):", "vb", VB_BY_ION.get("protons", 4.7)),
             ("Default Time (h):", "t", TIME_ETCHING),
         ]:
             row = QHBoxLayout()
             row.addWidget(QLabel(label))
-            s = QDoubleSpinBox(); s.setValue(val); s.setDecimals(3)
+            s = QDoubleSpinBox()
+            s.setValue(val)
+            s.setDecimals(3)
             self._etch_spins[key] = s
             row.addWidget(s)
             el.addLayout(row)
@@ -112,42 +135,46 @@ class ConfigTab(QWidget):
         alpha_tab = QWidget()
         al = QVBoxLayout(alpha_tab)
         al.addWidget(QLabel("Alpha Particle V(y) Model Selection"))
-        
+
         row = QHBoxLayout()
         row.addWidget(QLabel("Active Model:"))
         self.alpha_combo = QComboBox()
         for idx, info in ALPHA_MODELS_INFO.items():
             if idx in [2, 4, 5, 7]:
                 self.alpha_combo.addItem(f"Model {idx}: {info['name']}", idx)
-        
+
         # Set current
         idx_to_set = self.alpha_combo.findData(ALPHA_VT_MODEL)
         if idx_to_set >= 0:
             self.alpha_combo.setCurrentIndex(idx_to_set)
-        
+
         row.addWidget(self.alpha_combo)
         al.addLayout(row)
-        
+
         self.alpha_formula = QLabel("")
-        self.alpha_formula.setStyleSheet("font-style: italic; color: #fab387; margin-top: 5px;")
+        self.alpha_formula.setStyleSheet(
+            "font-style: italic; color: #fab387; margin-top: 5px;"
+        )
         self.alpha_formula.setWordWrap(True)
         al.addWidget(self.alpha_formula)
-        
+
         self.alpha_params_label = QLabel("")
-        self.alpha_params_label.setStyleSheet("font-size: 10px; color: #a6adc8; margin-top: 5px;")
+        self.alpha_params_label.setStyleSheet(
+            "font-size: 10px; color: #a6adc8; margin-top: 5px;"
+        )
         al.addWidget(self.alpha_params_label)
-        
+
         al.addStretch()
         tabs.addTab(alpha_tab, "Alpha Physics")
 
         sl.addWidget(tabs)
-        
+
         # Connect changes to global config
         self.optics_combo.currentIndexChanged.connect(self._on_optics_changed)
         self.alpha_combo.currentIndexChanged.connect(self._on_alpha_changed)
-        
+
         self._update_alpha_info()
-        
+
         save_btn = QPushButton("Save Settings")
         save_btn.clicked.connect(self._on_save)
         sl.addWidget(save_btn)
@@ -159,17 +186,20 @@ class ConfigTab(QWidget):
 
     def _on_optics_changed(self, index):
         import tracklab.config as cfg
+
         model = "full_trace" if index == 1 else "optimized"
         cfg.OPTICS_MODEL = model
         print(f"[Config] Optics model changed to: {model}")
 
     def _on_alpha_changed(self, index):
         import tracklab.config as cfg
+
         model_idx = self.alpha_combo.currentData()
         cfg.ALPHA_VT_MODEL = model_idx
         self._update_alpha_info()
         # Clear physics cache so re-calculation picks up the new model
         from tracklab.vt_utils import clear_vrint_cache
+
         clear_vrint_cache()
         print(f"[Config] Alpha VT Model changed to: {model_idx}")
 
@@ -178,18 +208,25 @@ class ConfigTab(QWidget):
         info = ALPHA_MODELS_INFO.get(idx)
         if info:
             self.alpha_formula.setText(f"Formula: {info['formula']}")
-            p_str = " | ".join([f"{k}={v}" for k, v in info['p'].items()])
+            p_str = " | ".join([f"{k}={v}" for k, v in info["p"].items()])
             self.alpha_params_label.setText(f"Parameters: {p_str}")
 
     def _on_save(self):
         QMessageBox.information(
-            self, "Settings",
-            "Settings updated. Physics engine now using " + 
-            ("Full Trace (v3.0)" if self.optics_combo.currentIndex() == 1 else "Optimized (v2.0)"))
+            self,
+            "Settings",
+            "Settings updated. Physics engine now using "
+            + (
+                "Full Trace (v3.0)"
+                if self.optics_combo.currentIndex() == 1
+                else "Optimized (v2.0)"
+            ),
+        )
 
     def _init_ui_info_panel(self, layout, f):
         # ── Info panel ───
-        info = QFrame(); info.setProperty("type", "card")
+        info = QFrame()
+        info.setProperty("type", "card")
         il = QVBoxLayout(info)
         il.setContentsMargins(16, 16, 16, 16)
 

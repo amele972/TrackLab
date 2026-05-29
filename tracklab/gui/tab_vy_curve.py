@@ -4,14 +4,19 @@ tab_vy_curve.py — Mode 1: V(y) Curve Explorer
 Plot the etch-rate ratio V(y) for any ion, with experimental data overlay.
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QDoubleSpinBox, QFrame, QMessageBox,
-)
-from PyQt6.QtGui import QFont
+import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import numpy as np
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QDoubleSpinBox,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from .styles import get_plot_colors
 
@@ -22,7 +27,7 @@ ALPHA_MODEL_NAMES = [
     "Al-Jubbori (2020)",
     "Hermsdorf (2009)",
     "Green et al. (1982)",
-    "Yu et al. (2005a,b)"
+    "Yu et al. (2005a,b)",
 ]
 
 
@@ -44,7 +49,9 @@ class VyCurveTab(QWidget):
         layout.setSpacing(10)
 
         header = QLabel("Mode 1 — V(y) Etch-Rate Curve")
-        f = QFont(); f.setBold(True); f.setPointSize(12)
+        f = QFont()
+        f.setBold(True)
+        f.setPointSize(12)
         header.setFont(f)
         header.setStyleSheet("color: #89b4fa;")
         layout.addWidget(header)
@@ -52,7 +59,8 @@ class VyCurveTab(QWidget):
         desc = QLabel(
             "Plot the dimensionless etch-rate ratio V(y) = VT(y)/VB as a function "
             "of residual range y. For protons the Nikezic analytical model is used; "
-            "for other ions the Broken Power Law (BPL) fitted to experimental data.")
+            "for other ions the Broken Power Law (BPL) fitted to experimental data."
+        )
         desc.setWordWrap(True)
         desc.setStyleSheet("font-size: 11px; margin-bottom: 8px;")
         layout.addWidget(desc)
@@ -87,7 +95,7 @@ class VyCurveTab(QWidget):
         # Plot canvas
         c = self._colors()
         self.fig = Figure(figsize=(10, 6), dpi=100)
-        self.fig.patch.set_facecolor(c['bg'])
+        self.fig.patch.set_facecolor(c["bg"])
         self.canvas = FigureCanvas(self.fig)
         layout.addWidget(self.canvas, 1)
 
@@ -98,23 +106,23 @@ class VyCurveTab(QWidget):
 
     def _on_theme_changed(self, theme):
         c = self._colors()
-        self.fig.patch.set_facecolor(c['bg'])
+        self.fig.patch.set_facecolor(c["bg"])
         for ax in self.fig.axes:
-            ax.set_facecolor(c['axes_bg'])
-            ax.tick_params(colors=c['muted'])
-            ax.xaxis.label.set_color(c['text'])
-            ax.yaxis.label.set_color(c['text'])
-            ax.title.set_color(c['text'])
+            ax.set_facecolor(c["axes_bg"])
+            ax.tick_params(colors=c["muted"])
+            ax.xaxis.label.set_color(c["text"])
+            ax.yaxis.label.set_color(c["text"])
+            ax.title.set_color(c["text"])
             for spine in ax.spines.values():
-                spine.set_color(c['border'])
+                spine.set_color(c["border"])
         self.canvas.draw()
 
     def _style_ax(self, ax):
         c = self._colors()
-        ax.set_facecolor(c['axes_bg'])
-        ax.tick_params(colors=c['muted'])
+        ax.set_facecolor(c["axes_bg"])
+        ax.tick_params(colors=c["muted"])
         for spine in ax.spines.values():
-            spine.set_color(c['border'])
+            spine.set_color(c["border"])
 
     def _plot(self):
         """Plot V(y) for the currently selected ion."""
@@ -133,45 +141,69 @@ class VyCurveTab(QWidget):
             y = np.linspace(0.01, ymax, npts)
 
             self.fig.clear()
-            self.fig.patch.set_facecolor(c['bg'])
+            self.fig.patch.set_facecolor(c["bg"])
             ax = self.fig.add_subplot(111)
             self._style_ax(ax)
 
-            if ion == 'protons':
+            if ion == "protons":
                 v = vt_function(y)
-                ax.plot(y, v, '-', color=c['accent'], lw=2.5,
-                        label=f'Protons (Analytical)')
-                ax.set_title("Model: Hermsdorf / Nikezic (Analytical)", 
-                             color=c['muted'], fontsize=10)
-            elif ion == 'alpha':
+                ax.plot(
+                    y, v, "-", color=c["accent"], lw=2.5, label="Protons (Analytical)"
+                )
+                ax.set_title(
+                    "Model: Hermsdorf / Nikezic (Analytical)",
+                    color=c["muted"],
+                    fontsize=10,
+                )
+            elif ion == "alpha":
                 v = model.V(y, ion=ion, energy=energy, vb=vb)
-                ax.plot(y, v, '-', color=c['accent5'], lw=2.5,
-                        label=f'Alpha (Analytical)')
-                
+                ax.plot(
+                    y, v, "-", color=c["accent5"], lw=2.5, label="Alpha (Analytical)"
+                )
+
                 from tracklab.config import ALPHA_VT_MODEL
-                m_name = ALPHA_MODEL_NAMES[ALPHA_VT_MODEL-1] if 1 <= ALPHA_VT_MODEL <= 7 else "Custom"
-                ax.set_title(f"Model: {m_name} (Analytical)", 
-                             color=c['muted'], fontsize=10)
+
+                m_name = (
+                    ALPHA_MODEL_NAMES[ALPHA_VT_MODEL - 1]
+                    if 1 <= ALPHA_VT_MODEL <= 7
+                    else "Custom"
+                )
+                ax.set_title(
+                    f"Model: {m_name} (Analytical)", color=c["muted"], fontsize=10
+                )
             else:
                 v = model.V(y, ion=ion, energy=energy, vb=vb)
-                ax.plot(y, v, '-', color=c['accent2'], lw=2.5,
-                        label=f'{ion} @ {energy:.1f} MeV (BPL)')
+                ax.plot(
+                    y,
+                    v,
+                    "-",
+                    color=c["accent2"],
+                    lw=2.5,
+                    label=f"{ion} @ {energy:.1f} MeV (BPL)",
+                )
 
                 params = model.get_parameters(ion, energy)
                 ax.set_title(
                     f"BPL: A={params['A']:.3f}, y₀={params['y0']:.3f}, "
                     f"α={params['alpha']:.3f}, β={params['beta']:.3f}",
-                    color=c['muted'], fontsize=10)
+                    color=c["muted"],
+                    fontsize=10,
+                )
 
-            ax.axhline(1.0, color=c['grid'], ls='--', lw=1, alpha=0.7,
-                       label='V = 1 (bulk)')
-            ax.set_xlabel('Residual range y (µm)', color=c['text'], fontsize=11)
-            ax.set_ylabel('V(y) = VT(y) / VB', color=c['text'], fontsize=11)
-            ax.set_title(f'V(y) for {ion}', color=c['text'], fontsize=13,
-                         fontweight='bold')
-            ax.legend(facecolor=c['legend_bg'], edgecolor=c['legend_edge'],
-                      labelcolor=c['text'])
-            ax.grid(True, alpha=0.2, color=c['grid'])
+            ax.axhline(
+                1.0, color=c["grid"], ls="--", lw=1, alpha=0.7, label="V = 1 (bulk)"
+            )
+            ax.set_xlabel("Residual range y (µm)", color=c["text"], fontsize=11)
+            ax.set_ylabel("V(y) = VT(y) / VB", color=c["text"], fontsize=11)
+            ax.set_title(
+                f"V(y) for {ion}", color=c["text"], fontsize=13, fontweight="bold"
+            )
+            ax.legend(
+                facecolor=c["legend_bg"],
+                edgecolor=c["legend_edge"],
+                labelcolor=c["text"],
+            )
+            ax.grid(True, alpha=0.2, color=c["grid"])
 
             self.fig.tight_layout()
             self.canvas.draw()
@@ -179,8 +211,8 @@ class VyCurveTab(QWidget):
             vmax = float(np.max(v))
             y_peak = float(y[np.argmax(v)])
             self.info_label.setText(
-                f"V_max = {vmax:.4f} at y = {y_peak:.2f} µm  |  "
-                f"VB = {vb:.2f} µm/h")
+                f"V_max = {vmax:.4f} at y = {y_peak:.2f} µm  |  VB = {vb:.2f} µm/h"
+            )
 
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
@@ -197,40 +229,50 @@ class VyCurveTab(QWidget):
             y = np.linspace(0.01, ymax, int(self.npts_spin.value()))
 
             self.fig.clear()
-            self.fig.patch.set_facecolor(c['bg'])
+            self.fig.patch.set_facecolor(c["bg"])
             ax = self.fig.add_subplot(111)
             self._style_ax(ax)
 
             colors = {
-                'protons': c['accent'],
-                'Li': c['accent3'],
-                'C': c['accent2'],
-                'O': c['accent4'],
-                'alpha': c['accent5'],
+                "protons": c["accent"],
+                "Li": c["accent3"],
+                "C": c["accent2"],
+                "O": c["accent4"],
+                "alpha": c["accent5"],
             }
             test_energies = {
-                'protons': 1.0, 'Li': 6.75, 'C': 14.8,
-                'O': 22.0, 'alpha': 5.0,
+                "protons": 1.0,
+                "Li": 6.75,
+                "C": 14.8,
+                "O": 22.0,
+                "alpha": 5.0,
             }
 
             for ion, color in colors.items():
                 energy = test_energies.get(ion, 1.0)
-                if ion == 'protons':
+                if ion == "protons":
                     v = vt_function(y)
-                    label = 'Protons'
+                    label = "Protons"
                 else:
                     v = model.V(y, ion=ion, energy=energy, vb=1.73)
-                    label = f'{ion} @ {energy} MeV'
-                ax.plot(y, v, '-', color=color, lw=2, label=label)
+                    label = f"{ion} @ {energy} MeV"
+                ax.plot(y, v, "-", color=color, lw=2, label=label)
 
-            ax.axhline(1.0, color=c['grid'], ls='--', lw=1, alpha=0.7)
-            ax.set_xlabel('Residual range y (µm)', color=c['text'], fontsize=11)
-            ax.set_ylabel('V(y)', color=c['text'], fontsize=11)
-            ax.set_title('V(y) Comparison — All Ions', color=c['text'],
-                         fontsize=13, fontweight='bold')
-            ax.legend(facecolor=c['legend_bg'], edgecolor=c['legend_edge'],
-                      labelcolor=c['text'])
-            ax.grid(True, alpha=0.2, color=c['grid'])
+            ax.axhline(1.0, color=c["grid"], ls="--", lw=1, alpha=0.7)
+            ax.set_xlabel("Residual range y (µm)", color=c["text"], fontsize=11)
+            ax.set_ylabel("V(y)", color=c["text"], fontsize=11)
+            ax.set_title(
+                "V(y) Comparison — All Ions",
+                color=c["text"],
+                fontsize=13,
+                fontweight="bold",
+            )
+            ax.legend(
+                facecolor=c["legend_bg"],
+                edgecolor=c["legend_edge"],
+                labelcolor=c["text"],
+            )
+            ax.grid(True, alpha=0.2, color=c["grid"])
 
             self.fig.tight_layout()
             self.canvas.draw()

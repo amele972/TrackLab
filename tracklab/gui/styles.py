@@ -8,50 +8,51 @@ Usage:
     app.setStyleSheet(get_stylesheet('dark'))   # or 'light'
 """
 
-THEMES = ['dark', 'light']
+THEMES = ["dark", "light"]
 
 # ── Matplotlib plot colors per theme ─────────────────────────────────
 PLOT_COLORS = {
-    'dark': {
-        'bg':       '#1e1e2e',
-        'axes_bg':  '#313244',
-        'text':     '#cdd6f4',
-        'grid':     '#585b70',
-        'accent':   '#89b4fa',
-        'accent2':  '#f38ba8',
-        'accent3':  '#a6e3a1',
-        'accent4':  '#fab387',
-        'accent5':  '#cba6f7',
-        'muted':    '#a6adc8',
-        'border':   '#585b70',
-        'legend_bg': '#313244',
-        'legend_edge': '#585b70',
+    "dark": {
+        "bg": "#1e1e2e",
+        "axes_bg": "#313244",
+        "text": "#cdd6f4",
+        "grid": "#585b70",
+        "accent": "#89b4fa",
+        "accent2": "#f38ba8",
+        "accent3": "#a6e3a1",
+        "accent4": "#fab387",
+        "accent5": "#cba6f7",
+        "muted": "#a6adc8",
+        "border": "#585b70",
+        "legend_bg": "#313244",
+        "legend_edge": "#585b70",
     },
-    'light': {
-        'bg':       '#ffffff',
-        'axes_bg':  '#f8f9fa',
-        'text':     '#0f172a',  # Darkened from #1e293b
-        'grid':     '#cbd5e1',
-        'accent':   '#2563eb',
-        'accent2':  '#dc2626',
-        'accent3':  '#16a34a',
-        'accent4':  '#ea580c',
-        'accent5':  '#9333ea',
-        'muted':    '#475569',  # Darkened from #64748b
-        'border':   '#e2e8f0',
-        'legend_bg': '#ffffff',
-        'legend_edge': '#e2e8f0',
+    "light": {
+        "bg": "#ffffff",
+        "axes_bg": "#f8f9fa",
+        "text": "#0f172a",  # Darkened from #1e293b
+        "grid": "#cbd5e1",
+        "accent": "#2563eb",
+        "accent2": "#dc2626",
+        "accent3": "#16a34a",
+        "accent4": "#ea580c",
+        "accent5": "#9333ea",
+        "muted": "#475569",  # Darkened from #64748b
+        "border": "#e2e8f0",
+        "legend_bg": "#ffffff",
+        "legend_edge": "#e2e8f0",
     },
 }
 
-def get_plot_colors(theme='dark'):
+
+def get_plot_colors(theme="dark"):
     """Return matplotlib color palette for the given theme."""
-    return PLOT_COLORS.get(theme, PLOT_COLORS['dark'])
+    return PLOT_COLORS.get(theme, PLOT_COLORS["dark"])
 
 
-def get_stylesheet(theme='dark'):
+def get_stylesheet(theme="dark"):
     """Return the QSS stylesheet for the given theme name."""
-    if theme == 'light':
+    if theme == "light":
         return STYLESHEET_LIGHT
     return STYLESHEET_DARK
 
@@ -464,6 +465,3 @@ QMenu::item:selected {
 
 # ── Default (backward compat) ───────────────────────────────────────
 STYLESHEET = STYLESHEET_LIGHT
-
-
-

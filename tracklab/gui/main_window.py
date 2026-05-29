@@ -4,32 +4,34 @@ main_window.py — TrackLab Main Window
 Unified splitter layout: shared param panel (left) + 7-tab widget (right).
 """
 
-from PyQt6.QtWidgets import (
-    QMainWindow, QSplitter, QTabWidget, QStatusBar, QMenuBar,
-    QWidget, QMessageBox,
-)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import (
+    QMainWindow,
+    QMessageBox,
+    QSplitter,
+    QTabWidget,
+)
 
-from .styles import get_stylesheet, THEMES
 from .param_panel import ParamPanel
-from .tab_vy_curve import VyCurveTab
-from .tab_single_track import SingleTrackTab
-from .tab_reference import ReferenceTab
-from .tab_fluka import FlukaTab
+from .styles import THEMES, get_stylesheet
 from .tab_3d_enhanced import Enhanced3DTab
-from .tab_lut import LUTTab
 from .tab_config import ConfigTab
+from .tab_fluka import FlukaTab
+from .tab_lut import LUTTab
+from .tab_reference import ReferenceTab
+from .tab_single_track import SingleTrackTab
+from .tab_vy_curve import VyCurveTab
 
 
-class TrackVisionMainWindow(QMainWindow):
+class TrackLabMainWindow(QMainWindow):
     """Unified multi-ion Track Lab GUI."""
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("TrackLab")
         self.setMinimumSize(1200, 800)
-        self._current_theme = 'light'
+        self._current_theme = "light"
         self.setStyleSheet(get_stylesheet(self._current_theme))
         self._init_menu()
         self._init_ui()
@@ -111,7 +113,8 @@ class TrackVisionMainWindow(QMainWindow):
             self.statusBar().showMessage(
                 f"Mode {index + 1}: {mode_names[index]}  •  "
                 f"Ion: {self.param_panel.ion}  •  "
-                f"VB: {self.param_panel.vb:.2f} µm/h")
+                f"VB: {self.param_panel.vb:.2f} µm/h"
+            )
 
     def _about(self):
         QMessageBox.about(
@@ -124,7 +127,7 @@ class TrackVisionMainWindow(QMainWindow):
             "  • Dorschel (protons)<br>"
             "  • BPL fitting (Li, C, O)<br><br>"
             "<b>GUI:</b> 7 modes with shared parameter panel<br>"
-            "<b>Framework:</b> PyQt6 + Matplotlib + NumPy/SciPy<br>"
+            "<b>Framework:</b> PyQt6 + Matplotlib + NumPy/SciPy<br>",
         )
 
     def _set_theme(self, theme):
@@ -134,8 +137,7 @@ class TrackVisionMainWindow(QMainWindow):
         self.param_panel.set_theme(theme)
         for t, action in self._theme_actions.items():
             action.setChecked(t == theme)
-        self.statusBar().showMessage(
-            f"Theme changed to {theme.capitalize()}")
+        self.statusBar().showMessage(f"Theme changed to {theme.capitalize()}")
 
     @property
     def current_theme(self):
