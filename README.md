@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Tests](https://img.shields.io/badge/tests-pytest-brightgreen.svg)](tests/)
 
-**TrackLab** is a Python package that simulates how charged particles (protons, alpha particles, lithium, carbon, oxygen) leave tracks in CR-39 plastic detectors, and models their optical appearance under a transmission microscope after chemical etching.
+**TrackLab** is a Python package that simulates the formation of tracks in PADC detectors during chemical etching from charged particles (protons, alpha particles, lithium, carbon, oxygen), and models their optical appearance under a transmission microscope.
 
 It acts as a physical bridge between Monte Carlo particle transport simulations (e.g. FLUKA, GEANT4) and physical detector observations.
 
