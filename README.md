@@ -1,5 +1,9 @@
 # ⚛️ TrackLab — High-Fidelity Nuclear Track Analysis in PADC (CR-39)
 
+<p align="center">
+  <img src="assets/logo.png" alt="TrackLab Logo" width="500">
+</p>
+
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://amele972.github.io/TrackLab/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
