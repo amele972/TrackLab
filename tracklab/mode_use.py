@@ -277,11 +277,18 @@ def run_mode4_fluka(
                 skipped += 1
                 continue
             energy_mev = float(parts[1]) * 1000.0
+            z_val = float(parts[4]) if len(parts) > 4 else -0.55
             cosz = np.clip(float(parts[7]), -1.0, 1.0)
             if energy_mev <= 0:
                 skipped += 1
                 continue
-            angle_deg = 90.0 - np.degrees(np.arccos(cosz))
+            angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
+
+            from .utils import compute_etching_time
+            etching_time_particle = compute_etching_time(z_val, vb=vb, t_ref=time_etching, cosz=cosz)
+            if etching_time_particle <= 0:
+                skipped += 1
+                continue
 
             F_interp = build_vrint_interpolator(
                 vt_model=vt_model, ion=ion, energy=energy_mev, vb=vb
@@ -290,11 +297,12 @@ def run_mode4_fluka(
                 energy=energy_mev,
                 angle_deg=angle_deg,
                 vb=vb,
-                time_etching=time_etching,
+                time_etching=etching_time_particle,
                 range_interpolator=range_interp,
                 F_interp=F_interp,
                 ion=ion,
                 vt_model=vt_model,
+                is_bottom_track=(cosz < 0),
             )
             results.append(
                 {

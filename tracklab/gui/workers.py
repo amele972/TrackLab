@@ -253,8 +253,8 @@ class FlukaWorker(QThread):
                         skipped += 1
                         continue
 
-                    angle_deg = 90.0 - np.degrees(np.arccos(cosz))
-                    etching_time = compute_etching_time(z_val, vb=vb)
+                    angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
+                    etching_time = compute_etching_time(z_val, vb=vb, cosz=cosz)
                     if etching_time <= 0:
                         skipped += 1
                         continue
@@ -272,6 +272,7 @@ class FlukaWorker(QThread):
                         F_interp=F_interp,
                         ion=ion,
                         vt_model=vt_model,
+                        is_bottom_track=(cosz < 0),
                     )
                     results.append(
                         {

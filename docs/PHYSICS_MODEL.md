@@ -46,15 +46,22 @@ $$F(u) = \int_0^u \frac{1}{V(\xi)} d\xi$$
 The integral of the track etch rate along a segment $[u_a, u_b]$ is then efficiently computed by interpolation:
 $$\int_{u_a}^{u_b} \frac{1}{V(\xi)} d\xi = F(u_b) - F(u_a)$$
 
-For a total etching time $t$, the etched distance $d_{\text{etch}}$ along the track is found by solving:
-$$\int_0^{d_{\text{etch}}} \frac{1}{v_T(R-x)} dx = t$$
+For a track originating at depth $z_{\text{origin}}$ relative to the etched surface, the etchant must first remove the bulk material to reach the track origin. This introduces a delay before track etching begins:
+$$t_{\text{delay}} = \frac{z_{\text{origin}}}{v_B}$$
+The effective etching time available for track formation is therefore:
+$$t_{\text{eff}} = \max(0, t - t_{\text{delay}})$$
 
-At any point $x \le d_{\text{etch}}$, the time $t(x)$ when the etchant first reached $x$ is:
+The etched distance $d_{\text{etch}}$ along the track is found by solving:
+$$\int_0^{d_{\text{etch}}} \frac{1}{v_T(R-x)} dx = t_{\text{eff}}$$
+
+At any point $x \le d_{\text{etch}}$, the time $t(x)$ when the etchant first reached $x$ relative to the start of track etching is:
 $$t(x) = \int_0^x \frac{1}{v_T(R-\xi)} d\xi$$
 
-The remaining etching time available for lateral growth at that point is $t_{\text{over}} = t - t(x)$. The radius of the resulting circular envelope at $x$ is:
+The remaining etching time available for lateral growth at that point is $t_{\text{over}} = t_{\text{eff}} - t(x)$. The radius of the resulting circular envelope at $x$ is:
 $$r_{\text{wall}}(x) = v_B \cdot t_{\text{over}} \cdot \cos(\delta)$$
 where $\delta = \arcsin(1/V(R-x))$ is the local critical angle.
+
+Tracks can originate from both the top and bottom surfaces of the detector. For tracks originating from the bottom surface (e.g., in a transmission configuration), the simulation effectively mirrors the geometry to model etching from the reverse side.
 
 Combining the lateral spheres along the trajectory constructs the 3D track wall profile.
 

@@ -48,15 +48,16 @@ def quadratic_interpolate(x0, y0, x1, y1, x2, y2, x):
     return a * x**2 + b * x + c
 
 
-def compute_etching_time(z_value, vb=None, z_ref=None, t_ref=None):
+def compute_etching_time(z_value, vb=None, z_ref=None, t_ref=None, cosz=1.0):
     """
-    Linearly scale etching time based on depth
+    Compute remaining etching time by subtracting the delay to reach depth z.
 
     Parameters:
-        z_value (float): Depth position (μm)
-        vb (float, optional): Bulk etch rate. Uses config.VB if None
-        z_ref (float, optional): Reference depth. Uses config.Z_REF if None
-        t_ref (float, optional): Reference time. Uses config.TIME_ETCHING if None
+        z_value (float): Depth position (cm)
+        vb (float, optional): Bulk etch rate (µm/h). Uses config.VB if None
+        z_ref (float, optional): Top reference depth (cm). Uses config.Z_REF if None
+        t_ref (float, optional): Total reference time (h). Uses config.TIME_ETCHING if None
+        cosz (float, optional): Cosine of incident angle to determine surface
 
     Returns:
         float: Etching time (hours)
@@ -68,7 +69,16 @@ def compute_etching_time(z_value, vb=None, z_ref=None, t_ref=None):
     if t_ref is None:
         t_ref = TIME_ETCHING
 
-    return max(t_ref * abs(z_value) / abs(z_ref), 0)
+    # Determine surface Z based on particle direction (top or bottom)
+    surface_z = z_ref if cosz >= 0 else abs(z_ref)
+    
+    # Distance from surface in cm, converted to µm
+    distance_um = abs(z_value - surface_z) * 10000.0
+    
+    # Delay time to reach the particle depth
+    delay_hours = distance_um / vb
+    
+    return max(t_ref - delay_hours, 0.0)
 
 
 def format_energy(energy):

@@ -60,6 +60,7 @@ def calculate_track_parameters(
     F_interp=None,
     ion=None,
     vt_model=None,
+    is_bottom_track: bool = False,
     debug: bool = False,
     plot: bool = False,
 ):
@@ -444,7 +445,13 @@ def calculate_track_parameters(
             Y_mesh[i, :] = y_L
             Z_mesh[i, :] = Z_k
 
-        X_surf, Y_surf, Z_surf = X_mesh, Y_mesh, Z_mesh
+        if is_bottom_track:
+            X_surf = X_mesh
+            Y_surf = Y_mesh
+            Z_surf = -Z_mesh
+        else:
+            X_surf, Y_surf, Z_surf = X_mesh, Y_mesh, Z_mesh
+            
         total_length_um = float(np.max(X_surf) - np.min(X_surf))
 
         optics_func = track_optics_p_optimized
@@ -455,6 +462,7 @@ def calculate_track_parameters(
             debug_mode=debug,
             condenser_na=CONDENSER_NA,
             n_cone_rays=N_CONE_RAYS,
+            is_bottom_track=is_bottom_track,
         )
         black_part, total_surface, projected_surface = bp, ts, ps
 

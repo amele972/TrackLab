@@ -58,6 +58,8 @@ calculate_track_parameters(
     F_interp,               # Integral interp
     ion: str = None,        # 'protons', 'alpha', 'Li', 'C', 'O'
     vt_model = None,        # VTMultiIonModel
+    origin_z: float = 0.0,  # Depth origin (µm) for delayed etching
+    from_bottom: bool = False, # Whether track originates from the bottom surface
     debug: bool = False,
 ) -> dict
 ```

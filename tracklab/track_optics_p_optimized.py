@@ -231,6 +231,7 @@ def track_optics_p_optimized(
     debug_mode=False,
     condenser_na=CONDENSER_NA,
     n_cone_rays=N_CONE_RAYS,
+    is_bottom_track=False,
 ):
     """
     Compute per-face optical brightness and statistics for a 3-D track mesh,
@@ -332,15 +333,18 @@ def track_optics_p_optimized(
         cos_i = np.abs(np.einsum("ij,ij->i", ray_tiled, normals_q))
         sin_i_sq = np.maximum(0.0, 1.0 - cos_i**2)
 
+        n1 = N_AIR if is_bottom_track else N_PLASTIC
+        n2 = N_PLASTIC if is_bottom_track else N_AIR
+
         # TIR
-        tir = (N_PLASTIC / N_AIR) ** 2 * sin_i_sq >= 1.0
-        # NA (sin in air = n_plastic * sin_i since n_air=1)
-        na_miss = N_PLASTIC * np.sqrt(sin_i_sq) > MICROSCOPE_NA
+        tir = (n1 / n2) ** 2 * sin_i_sq >= 1.0
+        # NA check (n1 * sin(i) is conserved across boundary, so we compare directly)
+        na_miss = n1 * np.sqrt(sin_i_sq) > MICROSCOPE_NA
 
         can = ~tir & ~na_miss
         T = np.zeros(Nq)
         if np.any(can):
-            T[can] = fresnel_transmittance(N_PLASTIC, N_AIR, cos_i[can], sin_i_sq[can])
+            T[can] = fresnel_transmittance(n1, n2, cos_i[can], sin_i_sq[can])
         brightness_q += T
 
     brightness_q /= n_rays
