@@ -1,4 +1,4 @@
-# ⚛️ TrackLab — High-Fidelity Nuclear Track Analysis in PADC (CR-39)
+# ⚛️ TrackLab — Nuclear Track Analysis in PADC (CR-39)
 
 <p align="center">
   <img src="assets/logo.png" alt="TrackLab Logo" width="500">
@@ -15,48 +15,82 @@ It acts as a physical bridge between Monte Carlo particle transport simulations 
 
 ---
 
-## 🎯 Features
+## 🏛️ Heritage and Modernization
 
-* **Unified Ion Physics**: Run calculations for multiple ions (Protons, Alphas, Lithium, Carbon, Oxygen) in a single tool.
-* **From Monte Carlo to the Microscope**: Import phase-space outputs from codes like FLUKA and convert them into simulated track profiles, opening dimensions, and realistic 2D microscope views.
-* **High Performance**: Written in clean, vectorized Python (using NumPy/SciPy), making calculations up to 100x faster than legacy Fortran codes.
-* **Interactive Dashboard**: Feature-rich PyQt6 graphical interface featuring 7 simulation and analysis modes.
+TrackLab is a complete, modernized Python reimplementation and expansion of the original Fortran codes:
+* **[TRACK_P](https://www.cityu.edu.hk/nru/Track_P.htm)**: Originally developed by D. Nikezic and K.N. Yu for simulating proton track geometry.
+* **[TRACK_VISION](https://www.cityu.edu.hk/nru/Track_Vision.htm)**: Developed by the same authors for rendering the optical appearance of etched tracks.
+
+This modern framework preserves the original physical foundations while extending the capabilities to handle multiple ion species, process large-scale Monte Carlo datasets (like FLUKA phase-space), and provide an interactive Graphical User Interface—all unified within a single Python environment.
 
 ---
 
-## 🛠️ Analysis Modes
+## ✨ Features
 
-1. **V(y) Curve Explorer**: Plot the track-to-bulk etch rate ratio ($V = V_T/V_B$) as a function of the particle's residual range.
-2. **Single Track Simulation**: Simulate and render an individual track based on energy, angle, and etch parameters.
-3. **Look-Up Table (LUT) Creator**: Generate a database of track geometries over user-defined energy and angle grids.
-4. **Monte Carlo (FLUKA) Processor**: Convert collective phase-space records into expected detector-response and track distributions.
-5. **Ultra-3D Visualization**: Generate and export high-fidelity 3D meshes (**OBJ, STL**) for Blender rendering or 3D printing.
-6. **Fast LUT Interpolation**: Estimate track parameters in real-time by interpolating against precomputed databases.
-7. **System Configuration**: Inspect active parameters, bulk etch rates, and paths.
+- 🔬 **Unified Multi-Ion Physics**: Run calculations for Protons, Alphas, Lithium, Carbon, and Oxygen in a single tool.
+- 🎲 **Monte Carlo Integration**: Import phase-space outputs directly from codes like FLUKA and convert them into simulated track profiles.
+- 📸 **Advanced Optical Simulation**: Ray-tracing optical engine simulating condenser-cone illumination and Fresnel transmittance.
+- 🖥️ **Interactive Dashboard**: Feature-rich PyQt6 graphical interface for seamless analysis and visualization.
+- 🚀 **High Performance**: Written in vectorized Python (NumPy/SciPy), making large-scale calculations significantly faster.
+
+---
+
+## ⚙️ How it Works
+
+TrackLab computes the three-dimensional geometry of etched tracks by modelling the competition between the bulk detector etch rate ($V_B$) and the track etch rate ($V_T$). 
+
+The track etch rate depends on the particle's residual range $R'$, calculated using SRIM range-energy tables and empirical parametrizations of the reduced etch-rate ratio $V(R') = V_T(R') / V_B$. For protons, TrackLab uses the standard Hermsdorf/Nikezic double-exponential model. For heavier ions, a Broken Power Law (BPL) or other selected empirical functions are used.
+
+After computing the 3D track mesh, TrackLab simulates its appearance under a transmission optical microscope by performing full 3D vector ray-tracing, checking for Total Internal Reflection (TIR), and computing intensity based on condenser-cone averaging and numerical aperture (NA) limits.
+
+---
+
+## 🖥️ Graphical User Interface
+
+TrackLab features a comprehensive GUI for configuring parameters and running all 7 operational modes without writing any code.
+
+<p align="center">
+  <img src="assets/GUI_2.jpg" alt="TrackLab GUI" width="800">
+</p>
+
+- **Mode 1:** V(y) Curve Explorer
+- **Mode 2:** Single Track Simulation (3D + Microscope view)
+- **Mode 3:** Look-Up Table (LUT) Creator
+- **Mode 4:** Monte Carlo (FLUKA) Processor
+- **Mode 5:** 3D Visualization & CAD Export
+- **Mode 6:** Fast LUT Interpolation
+- **Mode 7:** System Configuration
+
+To launch the dashboard, simply run:
+```bash
+tracklab-gui
+```
+*(Or use `python run_gui.py` from the source directory)*
 
 ---
 
 ## 💻 Installation
 
-To set up **TrackLab** on Windows:
+To set up **TrackLab** locally:
 
-```powershell
+```bash
 # 1. Clone the repository
 git clone https://github.com/amele972/TrackLab.git
 cd TrackLab
 
-# 2. Create a virtual environment
+# 2. Create and activate a virtual environment
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+# On Windows: .venv\Scripts\Activate.ps1
+# On macOS/Linux: source .venv/bin/activate
 
-# 3. Upgrade pip and install in editable mode with development dependencies
+# 3. Upgrade pip and install
 python -m pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
 ---
 
-## 🚀 Minimal Working Example
+## 🚀 Quick Start
 
 Here is a quick script demonstrating how to calculate track parameters programmatically:
 
@@ -85,14 +119,6 @@ print(f"Status: {res['status']}")
 print(f"Depth:  {res['depth_um']:.4f} um")
 print(f"Major Axis: {res['major_axis_um']:.4f} um")
 print(f"Minor Axis: {res['minor_axis_um']:.4f} um")
-print(f"Black fraction: {res['black_part']:.4f}")
-```
-
-To launch the graphical dashboard, simply run:
-```bash
-tracklab-gui
-# or:
-python run_gui.py
 ```
 
 ---
@@ -101,8 +127,7 @@ python run_gui.py
 
 The documentation can be built locally using Sphinx:
 
-```powershell
-pip install -e ".[dev]"
+```bash
 cd docs
 make html
 ```
@@ -111,14 +136,17 @@ After building, open `docs/_build/html/index.html` in your web browser.
 
 ---
 
-## 📜 Citations
+## 📜 Citations & References
 
-If you use TrackLab in your scientific publications, please cite the original physical models and software:
+The physics models underpinning TrackLab are based on the original works by Nikezic and Yu, as well as models established by Hermsdorf for the $V(R')$ sensitivity function.
 
-* **Proton Tracks (`TRACK_P`)**:
-  > D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, **SoftwareX**, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
-* **Optical Simulation (`TRACK_VISION`)**:
-  > D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, **Computer Physics Communications**, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)
+If you use TrackLab, please consider citing the original models:
+
+* **TRACK_P (Proton Tracks)**: D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, SoftwareX, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
+* **TRACK_VISION (Optical Simulation)**: D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, Computer Physics Communications, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)
+* **V-Function Models**: 
+  - D. Hermsdorf, *"Measurement and comparative evaluation of the sensitivity V for protons and hydrogen isotopes registration in PADC detectors of type CR-39"*, Radiation Measurements 44, 806–812, (2009).
+  - D. Hermsdorf, *"Evaluation of the sensitivity function V for registration of $\alpha$-particles in PADC CR-39 solid state nuclear track detector material"*, Radiation Measurements 44, 283–288, (2009).
 
 ---
 

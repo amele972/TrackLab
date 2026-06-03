@@ -108,3 +108,14 @@ Light rays originating from the microscope's illumination system enter the detec
 * **Objective NA Filter**: Only rays that exit the track pit and fall within the collection angle of the objective lens (defined by $\text{NA}_{\text{obj}} = 0.45$) contribute to the final image brightness. Rays refracted at high angles are discarded.
 
 Averaging the transmitted intensities of all cone rays for each mesh face yields the **Brightness Matrix**, which is then mapped to the 2D XY plane to render a high-fidelity synthetic microscope image.
+
+---
+
+## 3. References
+
+The physical framework in TrackLab derives from the legacy TRACK_P and TRACK_VISION codes, with track etch rate parametrizations incorporating extensive literature models. 
+
+1. **TRACK_P (Proton Tracks):** D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, SoftwareX, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
+2. **TRACK_VISION (Optical Simulation):** D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, Computer Physics Communications, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)
+3. **Proton $V(R')$ model:** D. Hermsdorf, *"Measurement and comparative evaluation of the sensitivity V for protons and hydrogen isotopes registration in PADC detectors of type CR-39"*, Radiation Measurements 44, 806–812, (2009).
+4. **Alpha particle $V(R')$ model:** D. Hermsdorf, *"Evaluation of the sensitivity function V for registration of $\alpha$-particles in PADC CR-39 solid state nuclear track detector material"*, Radiation Measurements 44, 283–288, (2009).
