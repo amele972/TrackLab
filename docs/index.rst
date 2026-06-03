@@ -1,7 +1,7 @@
 TrackLab Documentation
 ======================
 
-**TrackLab** is a Python suite that simulates how charged particles (protons, alpha particles, lithium, carbon, oxygen) leave tracks in CR-39 plastic detectors, and models how they look under an optical microscope after chemical etching.
+**TrackLab** is a Python suite that simulates the formation of tracks during chemical etching from latent trails left by charged particles (protons, alpha particles, lithium, carbon, oxygen) in CR-39 plastic detectors, and models their optical appearance under a transmission microscope.
 
 .. image:: https://img.shields.io/badge/Detector-CR--39-blue.svg
    :target: https://en.wikipedia.org/wiki/CR-39
