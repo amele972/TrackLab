@@ -29,7 +29,7 @@ This modern framework preserves the original physical foundations while extendin
 
 - 🔬 **Unified Multi-Ion Physics**: Run calculations for Protons, Alphas, Lithium, Carbon, and Oxygen in a single tool.
 - 🎲 **Monte Carlo Integration**: Import phase-space outputs directly from codes like FLUKA and convert them into simulated track profiles.
-- 📸 **Advanced Optical Simulation**: Ray-tracing optical engine simulating condenser-cone illumination and Fresnel transmittance.
+- 📸 **Realistic Optical Appearance**: Full 3D ray-tracing engine that simulates light propagation, reflection, and refraction to render true-to-life transmission microscope images.
 - 🖥️ **Interactive Dashboard**: Feature-rich PyQt6 graphical interface for seamless analysis and visualization.
 - 🚀 **High Performance**: Written in vectorized Python (NumPy/SciPy), making large-scale calculations significantly faster.
 
