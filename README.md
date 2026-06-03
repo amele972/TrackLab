@@ -39,7 +39,7 @@ This modern framework preserves the original physical foundations while extendin
 
 TrackLab computes the three-dimensional geometry of etched tracks by modelling the competition between the bulk detector etch rate ($V_B$) and the track etch rate ($V_T$). 
 
-The track etch rate depends on the particle's residual range $R'$, calculated using SRIM range-energy tables and empirical parametrizations of the reduced etch-rate ratio $V(R') = V_T(R') / V_B$. For protons, TrackLab uses the standard Hermsdorf/Nikezic double-exponential model. For heavier ions, a Broken Power Law (BPL) or other selected empirical functions are used.
+The track etch rate depends on the particle's residual range $R'$, calculated using SRIM range-energy tables and empirical parametrizations of the reduced etch-rate ratio $V(R') = V_T(R') / V_B$. For protons, TrackLab uses the standard Nikezic and Yu double-exponential model. For light ions, a Broken Power Law (BPL) or other selected empirical functions are used.
 
 After computing the 3D track mesh, TrackLab simulates its appearance under a transmission optical microscope by performing full 3D vector ray-tracing, checking for Total Internal Reflection (TIR), and computing intensity based on condenser-cone averaging and numerical aperture (NA) limits.
 
@@ -47,7 +47,7 @@ After computing the 3D track mesh, TrackLab simulates its appearance under a tra
 
 ## 🖥️ Graphical User Interface
 
-TrackLab features a comprehensive GUI for configuring parameters and running all 7 operational modes without writing any code.
+TrackLab features a comprehensive GUI for configuring parameters and running all operational modes without writing any code.
 
 <p align="center">
   <img src="assets/GUI_2.jpg" alt="TrackLab GUI" width="800">
