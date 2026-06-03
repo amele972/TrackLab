@@ -1,4 +1,4 @@
-# ⚛️ TrackLab — High-Fidelity Nuclear Track Analysis in PADC (CR-39)
+# ⚛️ TrackLab — Etched Track Analysis in PADC (CR-39)
 
 <p align="center">
   <img src="assets/logo.png" alt="TrackLab Logo" width="500">
