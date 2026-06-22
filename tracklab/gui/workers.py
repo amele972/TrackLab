@@ -208,6 +208,7 @@ class FlukaWorker(QThread):
 
             ion = self.params.get("ion", "protons")
             vb = self.params["vb"]
+            time_etching_ref = self.params.get("time", 2.83)
 
             interps, _ = load_srim_data()
             range_interp = interps.get(ion)
@@ -254,7 +255,7 @@ class FlukaWorker(QThread):
                         continue
 
                     angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
-                    etching_time = compute_etching_time(z_val, vb=vb, cosz=cosz)
+                    etching_time = compute_etching_time(z_val, vb=vb, t_ref=time_etching_ref, cosz=cosz)
                     if etching_time <= 0:
                         skipped += 1
                         continue

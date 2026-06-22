@@ -87,8 +87,9 @@ class _LUTLoaderMixin:
 
 
 class _Tab6a(QWidget, _LUTLoaderMixin):
-    def __init__(self):
+    def __init__(self, param_panel=None):
         super().__init__()
+        self.param_panel = param_panel
         lay = QVBoxLayout(self)
         lay.setContentsMargins(12, 12, 12, 12)
         lay.addWidget(_section_label("LUT File"))
@@ -163,8 +164,9 @@ class _Tab6a(QWidget, _LUTLoaderMixin):
 
 
 class _Tab6b(QWidget, _LUTLoaderMixin):
-    def __init__(self):
+    def __init__(self, param_panel=None):
         super().__init__()
+        self.param_panel = param_panel
         lay = QVBoxLayout(self)
         lay.setContentsMargins(12, 12, 12, 12)
         lay.addWidget(_section_label("LUT File"))
@@ -187,10 +189,21 @@ class _Tab6b(QWidget, _LUTLoaderMixin):
         self.skip_spin.setValue(1)
         self.skip_spin.setRange(0, 100)
         opts_row.addWidget(self.skip_spin)
+        
         opts_row.addWidget(QLabel("VB (µm/h):"))
         self.vb_spin = QDoubleSpinBox()
-        self.vb_spin.setValue(4.7)
+        self.vb_spin.setRange(0.01, 20.0)
+        self.vb_spin.setDecimals(3)
+        self.vb_spin.setValue(self.param_panel.vb if self.param_panel else 4.7)
         opts_row.addWidget(self.vb_spin)
+
+        opts_row.addWidget(QLabel("Time (h):"))
+        self.time_spin = QDoubleSpinBox()
+        self.time_spin.setRange(0.01, 100.0)
+        self.time_spin.setDecimals(2)
+        self.time_spin.setValue(self.param_panel.time if self.param_panel else 2.83)
+        opts_row.addWidget(self.time_spin)
+
         opts_row.addStretch()
         lay.addLayout(opts_row)
 
@@ -241,6 +254,7 @@ class _Tab6b(QWidget, _LUTLoaderMixin):
                 self._fluka_path,
                 skip_header=self.skip_spin.value(),
                 vb=self.vb_spin.value(),
+                time_etching_ref=self.time_spin.value(),
             )
 
         self._worker = GenericWorker(do_work)
@@ -278,8 +292,9 @@ class _Tab6b(QWidget, _LUTLoaderMixin):
 
 
 class _Tab6c(QWidget, _LUTLoaderMixin):
-    def __init__(self):
+    def __init__(self, param_panel=None):
         super().__init__()
+        self.param_panel = param_panel
         lay = QVBoxLayout(self)
         lay.setContentsMargins(12, 12, 12, 12)
         lay.addWidget(_section_label("LUT File"))
@@ -383,7 +398,7 @@ class LUTTab(QWidget):
         layout.addWidget(desc)
 
         tabs = QTabWidget()
-        tabs.addTab(_Tab6a(), "6a: Single Lookup")
-        tabs.addTab(_Tab6b(), "6b: FLUKA Batch")
-        tabs.addTab(_Tab6c(), "6c: Inverse (axes→E,θ)")
+        tabs.addTab(_Tab6a(self.param_panel), "6a: Single Lookup")
+        tabs.addTab(_Tab6b(self.param_panel), "6b: FLUKA Batch")
+        tabs.addTab(_Tab6c(self.param_panel), "6c: Inverse (axes→E,θ)")
         layout.addWidget(tabs)

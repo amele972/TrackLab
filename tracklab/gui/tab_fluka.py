@@ -189,6 +189,7 @@ class FlukaTab(QWidget):
         params = {
             "ion": self.param_panel.ion,
             "vb": self.param_panel.vb,
+            "time": self.param_panel.time,
             "file": self.input_file,
             "skip_header": self.skip_header.value(),
             "beam_energy_MeV": getattr(self, "_beam_energy", None),
