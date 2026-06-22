@@ -123,6 +123,13 @@ print(f"Minor Axis: {res['minor_axis_um']:.4f} um")
 
 ---
 
+## 📓 Interactive User Guide
+
+For a step-by-step walk-through of the physics engine and analysis modes with executable code examples, check out the interactive Jupyter Notebook in the root directory:
+* [TrackLab_User_Guide.ipynb](TrackLab_User_Guide.ipynb)
+
+---
+
 ## 📖 Building the Documentation
 
 The documentation can be built locally using Sphinx:
