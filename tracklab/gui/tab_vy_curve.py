@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
+    QComboBox,
     QDoubleSpinBox,
     QHBoxLayout,
     QLabel,
@@ -19,6 +20,7 @@ from PyQt6.QtWidgets import (
 )
 
 from .styles import get_plot_colors
+from tracklab.config import SUPPORTED_IONS
 
 ALPHA_MODEL_NAMES = [
     "Durrani & Bull (1987)",
@@ -67,6 +69,12 @@ class VyCurveTab(QWidget):
 
         # Controls
         ctrl = QHBoxLayout()
+        
+        ctrl.addWidget(QLabel("Ion:"))
+        self.ion_combo = QComboBox()
+        self.ion_combo.addItems(list(SUPPORTED_IONS))
+        ctrl.addWidget(self.ion_combo)
+        
         ctrl.addWidget(QLabel("y max (µm):"))
         self.ymax_spin = QDoubleSpinBox()
         self.ymax_spin.setValue(50.0)
@@ -131,7 +139,7 @@ class VyCurveTab(QWidget):
             from tracklab.vt_utils import vt_function
 
             c = self._colors()
-            ion = self.param_panel.ion
+            ion = self.ion_combo.currentText()
             energy = self.param_panel.energy
             vb = self.param_panel.vb
             ymax = self.ymax_spin.value()
@@ -150,8 +158,13 @@ class VyCurveTab(QWidget):
                 ax.plot(
                     y, v, "-", color=c["accent"], lw=2.5, label="Protons (Analytical)"
                 )
+                from tracklab.config import PROTON_MODELS_INFO, PROTON_VT_MODEL
+
+                p_name = PROTON_MODELS_INFO.get(PROTON_VT_MODEL, {}).get(
+                    "name", "Analytical"
+                )
                 ax.set_title(
-                    "Model: Hermsdorf / Nikezic (Analytical)",
+                    f"Model: {p_name}",
                     color=c["muted"],
                     fontsize=10,
                 )

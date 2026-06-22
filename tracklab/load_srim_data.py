@@ -21,7 +21,7 @@ from scipy.interpolate import PchipInterpolator
 from scipy.optimize import curve_fit
 
 
-def load_srim_data(filename=None, target_max_mev=30.0):
+def load_srim_data(filename=None, target_max_mev=6000.0):
     """
     Load SRIM range data and create separate interpolators per ion.
 

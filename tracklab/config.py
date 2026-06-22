@@ -31,7 +31,7 @@ VB = VB_BY_ION["protons"]
 # PROTON VT MODELS
 # ============================================================================
 
-# Selection for the V(y) model to be used for Protons (Default = 2)
+# Selection for the V(y) model to be used for Protons (Default = 1)
 # Available models:
 # 1: Double-Exponential (Original/Nominal Nikezic)
 # 2: Hermsdorf (2009)
@@ -49,6 +49,35 @@ PROTON_VT_PARAMS = {
     "a5": 1.4120,
 }
 
+# Detailed configuration for Proton VT models
+PROTON_MODELS_INFO = {
+    1: {
+        "name": "Nikezic / Double-Exp (Original)",
+        "formula": "1 + (a1·exp(-a2·y) + a3·exp(-a4·y))·(1 − exp(-a5·y))",
+        "p": {"a1": 0.4306, "a2": 7.3736e-3, "a3": 1.0559, "a4": 0.1072, "a5": 1.4120},
+    },
+    2: {
+        "name": "Hermsdorf (2009)",
+        "formula": "1 + a1/((y+a2)^b1)·ln(y+a3)·(1−exp(−y/a4)) + y/a5",
+        "p": {"a1": 3.4, "a2": 1.0, "a3": 1.0, "a4": 0.4, "a5": 1500.0, "b1": 1.0},
+    },
+    3: {
+        "name": "Fromm – Fitted",
+        "formula": "1 + 2·a1·y·(Vmax−1) / (a1² + y²)",
+        "p": {"a1": 3.2, "Vmax": 2.20},
+    },
+    4: {
+        "name": "Fromm – Theoretical",
+        "formula": "1 + 2·a1·y·(Vmax−1) / (a1² + y²)",
+        "p": {"a1": 1.5, "Vmax": 2.20},
+    },
+    5: {
+        "name": "Optimised Double-Exp",
+        "formula": "1 + (a1·exp(-a2·y) + a3·exp(-a4·y))·(1 − exp(-a5·y))",
+        "p": {"a1": 0.3268, "a2": 9.233e-3, "a3": 1.2908, "a4": 0.1373, "a5": 1.1165},
+    },
+}
+
 # ============================================================================
 # ALPHA PARTICLE VT MODELS
 # ============================================================================
@@ -62,7 +91,7 @@ PROTON_VT_PARAMS = {
 # 5: Hermsdorf (2009) - 1 + (a1/(a2+y)**b1) * (1-exp(-y/a4)) * (ln(y+a3) + y/a5)
 # 6: Green et al. (1982) - 1 + (11.45*exp(-0.339y) + 4*exp(-0.44y)) * (1 - exp(-0.58y))
 # 7: Yu et al. (2005a,b) - 1 + exp(-a1*y + a3) - exp(-a2*y + a3)
-ALPHA_VT_MODEL = 2
+ALPHA_VT_MODEL = 5  # Hermsdorf (2009)
 
 # Detailed configuration for Alpha VT models (Standard Parameters)
 ALPHA_MODELS_INFO = {

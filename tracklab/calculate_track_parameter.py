@@ -113,6 +113,10 @@ def calculate_track_parameters(
     # 1. Physics setup
     # ------------------------------------------------------------------
     range_val = interpolate_range(energy, range_interpolator)
+    if np.isnan(range_val):
+        return _result_template(
+            energy, angle_deg, 0.0, vb * time_etching, "Energy exceeds SRIM tables"
+        )
     removed = vb * time_etching
     original_removed = removed
     original_range = range_val

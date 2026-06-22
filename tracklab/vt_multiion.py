@@ -160,6 +160,13 @@ class VTMultiIonModel:
                     "beta": 2.9860,
                     "r2": 0.999,
                 },
+                176.56: {
+                    "A": 18.0433,
+                    "y0": 9.1102,
+                    "alpha": 0.6736,
+                    "beta": 1.5920,
+                    "r2": 0.999,
+                },
             },
             "O": {
                 17.26: {
@@ -346,11 +353,8 @@ class VTMultiIonModel:
             # Analytical model returns V directly; stay constant regardless of vb
             return v_raw
         else:
-            # BPL model returns the fitted ratio V_fitted at VB_nominal
-            if vb is not None and vb > 0:
-                vb_nominal = self.VB_FIT.get(ion, VB_FIT_DATA)
-                # Scaling logic: (V-1) scales inversely with VB, assuming excess VT is constant
-                return 1.0 + (v_raw - 1.0) * (vb_nominal / vb)
+            # User requested invariant V_T / V_B scaling. 
+            # We return the fitted ratio directly without rescaling it by (VB_nominal / vb)
             return v_raw
 
     def _V_fit(self, y, ion, energy):

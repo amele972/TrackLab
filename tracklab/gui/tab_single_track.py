@@ -153,7 +153,7 @@ class SingleTrackTab(QWidget):
 
     def _plot_4panel(self, res):
         X, Y, Z, B = (res["X_surf"], res["Y_surf"], res["Z_surf"], res["B_faces"])
-        if X is None:
+        if X is None or np.isnan(X).all():
             return
 
         c = self._colors()

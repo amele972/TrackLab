@@ -27,6 +27,8 @@ from tracklab.config import (
     MICROSCOPE_NA,
     N_PLASTIC,
     OPTICS_MODEL,
+    PROTON_MODELS_INFO,
+    PROTON_VT_MODEL,
     SUPPORTED_IONS,
     TIME_ETCHING,
     VB_BY_ION,
@@ -140,8 +142,7 @@ class ConfigTab(QWidget):
         row.addWidget(QLabel("Active Model:"))
         self.alpha_combo = QComboBox()
         for idx, info in ALPHA_MODELS_INFO.items():
-            if idx in [2, 4, 5, 7]:
-                self.alpha_combo.addItem(f"Model {idx}: {info['name']}", idx)
+            self.alpha_combo.addItem(f"Model {idx}: {info['name']}", idx)
 
         # Set current
         idx_to_set = self.alpha_combo.findData(ALPHA_VT_MODEL)
@@ -167,13 +168,50 @@ class ConfigTab(QWidget):
         al.addStretch()
         tabs.addTab(alpha_tab, "Alpha Physics")
 
+        # ── Proton Physics tab ───────────────────────────────────────────────
+        proton_tab = QWidget()
+        pl = QVBoxLayout(proton_tab)
+        pl.addWidget(QLabel("Proton V(y) Model Selection"))
+
+        p_row = QHBoxLayout()
+        p_row.addWidget(QLabel("Active Model:"))
+        self.proton_combo = QComboBox()
+        for idx, info in PROTON_MODELS_INFO.items():
+            self.proton_combo.addItem(f"Model {idx}: {info['name']}", idx)
+
+        # Set current selection from config
+        p_idx_to_set = self.proton_combo.findData(PROTON_VT_MODEL)
+        if p_idx_to_set >= 0:
+            self.proton_combo.setCurrentIndex(p_idx_to_set)
+
+        p_row.addWidget(self.proton_combo)
+        pl.addLayout(p_row)
+
+        self.proton_formula = QLabel("")
+        self.proton_formula.setStyleSheet(
+            "font-style: italic; color: #fab387; margin-top: 5px;"
+        )
+        self.proton_formula.setWordWrap(True)
+        pl.addWidget(self.proton_formula)
+
+        self.proton_params_label = QLabel("")
+        self.proton_params_label.setStyleSheet(
+            "font-size: 10px; color: #a6adc8; margin-top: 5px;"
+        )
+        pl.addWidget(self.proton_params_label)
+
+        pl.addStretch()
+        tabs.addTab(proton_tab, "Proton Physics")
+
         sl.addWidget(tabs)
 
         # Connect changes to global config
         self.optics_combo.currentIndexChanged.connect(self._on_optics_changed)
         self.alpha_combo.currentIndexChanged.connect(self._on_alpha_changed)
+        self.proton_combo.currentIndexChanged.connect(self._on_proton_changed)
 
         self._update_alpha_info()
+        self._update_proton_info()
 
         save_btn = QPushButton("Save Settings")
         save_btn.clicked.connect(self._on_save)
@@ -211,17 +249,28 @@ class ConfigTab(QWidget):
             p_str = " | ".join([f"{k}={v}" for k, v in info["p"].items()])
             self.alpha_params_label.setText(f"Parameters: {p_str}")
 
+    def _on_proton_changed(self, index):
+        import tracklab.config as cfg
+
+        model_idx = self.proton_combo.currentData()
+        cfg.PROTON_VT_MODEL = model_idx
+        self._update_proton_info()
+        # Clear physics cache so re-calculation picks up the new model
+        from tracklab.vt_utils import clear_vrint_cache
+
+        clear_vrint_cache()
+        print(f"[Config] Proton VT Model changed to: {model_idx}")
+
+    def _update_proton_info(self):
+        idx = self.proton_combo.currentData()
+        info = PROTON_MODELS_INFO.get(idx)
+        if info:
+            self.proton_formula.setText(f"Formula: {info['formula']}")
+            p_str = " | ".join([f"{k}={v}" for k, v in info["p"].items()])
+            self.proton_params_label.setText(f"Parameters: {p_str}")
+
     def _on_save(self):
-        QMessageBox.information(
-            self,
-            "Settings",
-            "Settings updated. Physics engine now using "
-            + (
-                "Full Trace (v3.0)"
-                if self.optics_combo.currentIndex() == 1
-                else "Optimized (v2.0)"
-            ),
-        )
+        QMessageBox.information(self, "Settings", "Settings updated.")
 
     def _init_ui_info_panel(self, layout, f):
         # ── Info panel ───
@@ -249,7 +298,8 @@ class ConfigTab(QWidget):
             "&nbsp;&nbsp;• 6c Inverse: axes → (E, θ)<br>"
             "<b>Mode 7</b> — Configuration<br><br>"
             "<b>V(y) Models:</b><br>"
-            "&nbsp;&nbsp;• protons: Dorschel analytical (5 params)<br>"
+            "&nbsp;&nbsp;• protons: 5 models (Nikezic, Hermsdorf, Fromm…)<br>"
+            "&nbsp;&nbsp;• alpha: 7 models (Durrani, Brun, Yu, Green…)<br>"
             "&nbsp;&nbsp;• Li, C, O: Broken Power Law (BPL)<br><br>"
             "<b>Data files:</b><br>"
             "&nbsp;&nbsp;• Rang_CR_all_ions_SRIM.dat<br>"
