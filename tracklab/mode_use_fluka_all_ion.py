@@ -40,6 +40,7 @@ def run_mode_fluka_all_ion(
     z_to_ion = {
         1: "protons",
         2: "alpha",
+        3: "Li",
         6: "C",
         8: "O"
     }
@@ -55,10 +56,6 @@ def run_mode_fluka_all_ion(
     results = []
     developed = 0
     skipped = 0
-    
-    # Duplicate prevention
-    # We store (NCASE, PART_NAME) to avoid counting the same track multiple times
-    processed_events = set()
 
     for idx, line in enumerate(lines):
         try:
@@ -87,14 +84,6 @@ def run_mode_fluka_all_ion(
             if not ion_name or ion_name not in interps:
                 skipped += 1
                 continue
-                
-            # 3. Prevent Double Counting
-            # We track the NCASE and particle type to ensure we only get one track start per particle in a history
-            event_key = (ncase, part_name)
-            if event_key in processed_events:
-                skipped += 1
-                continue
-            processed_events.add(event_key)
 
             # 4. Extract parameters
             energy_mev = ekin_gev * 1000.0
