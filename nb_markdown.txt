@@ -1,0 +1,135 @@
+
+======================================================================
+MARKDOWN CELL 00
+======================================================================
+# ⚛️ TrackLab — User Guide: Workflows & Analysis Modes
+
+Welcome to the **TrackLab User Guide**. This interactive notebook walks you through the physical modeling capabilities of TrackLab. You will learn how the physics engine works, how to use the different analysis modes, and how to run simulations both via the **Graphical User Interface (GUI)** and programmatically using **Python**.
+
+### Table of Contents
+1. **Section 1**: [Plotting and Comparing V(y) Etch-Rate Curves](#section1)
+2. **Section 2**: [Setting the Simulation Configuration](#section2)
+3. **Section 3**: [Single Track Simulation & Visualization](#section3)
+4. **Section 4**: [Generating and Using Look-Up Tables (LUT)](#section4)
+5. **Section 5**: [Processing Monte Carlo (FLUKA) Simulations](#section5)
+
+### 🖥️ TrackLab GUI Dashboard
+Below is a preview of the PyQt6 graphical user interface in **Single Track** calculation mode:
+
+![TrackLab GUI Dashboard](assets/GUI_2.jpg)
+
+======================================================================
+MARKDOWN CELL 02
+======================================================================
+<a id="section1"></a>
+## 📊 Section 1: Plotting and Comparing V(y) Etch-Rate Curves
+
+The reduced etch-rate ratio $V(y) = V_T(y)/V_B$ describes the ratio of the track etch rate ($V_T$) to the bulk etch rate ($V_B$) along the particle trajectory, as a function of the residual range $y$.
+
+### 🖥️ GUI Usage (Mode 1: V(y) Explorer)
+1. Launch the GUI with `python run_gui.py`.
+2. Navigate to the **1: V(y) Curve** tab.
+3. Select the ion from the dropdown menu (e.g., `protons`, `C`, `Li`, etc.).
+4. Enter the particle energy and click **Calculate** to see the curve overlaid with literature models.
+
+### 💻 Programmatic Usage
+Let's plot the $V(y)$ curves for Protons, Lithium, and Carbon using the TrackLab API:
+
+======================================================================
+MARKDOWN CELL 04
+======================================================================
+<a id="section2"></a>
+## ⚙️ Section 2: Setting the Simulation Configuration
+
+To run track simulations, you need to define the physical environment parameters:
+* **Bulk Etch Rate ($V_B$)**: The rate at which the chemical etchant dissolves the undamaged bulk detector material (typically in $\mu m/h$).
+* **Etching Time ($t$)**: The duration of chemical etching (in hours).
+* **Initial Energy ($E$)**: The initial kinetic energy of the particle (in MeV).
+* **Incidence Angle ($\theta$)**: The angle of entry with respect to the detector surface (in degrees, where $90^\circ$ is normal incidence).
+
+### 🖥️ GUI Configuration
+In the GUI, these parameters are located in the **left-hand settings panel** under 'Ion Selection' and 'Physical Parameters'. They apply globally to the active tab.
+
+### 💻 Programmatic Configuration
+Let's see how to retrieve bulk etch rates and load the SRIM range-energy datasets programmatically:
+
+======================================================================
+MARKDOWN CELL 06
+======================================================================
+<a id="section3"></a>
+## 🔍 Section 3: Single Track Simulation & Visualization
+
+This mode allows you to simulate the development of a single particle track and analyze its resulting morphology.
+
+### 🖥️ GUI Usage (Mode 2: Single Track)
+1. Navigate to the **2: Single Track** tab.
+2. Adjust parameters in the left panel (e.g., Proton, 1.5 MeV, 75° angle, $t = 2.83$ h).
+3. Click **Calculate Track**.
+4. The GUI displays:
+   * **3D View**: An interactive 3D model of the track cavity.
+   * **XY Microscope View**: A top-down optical simulation showing the track's contrast as seen under a transmission microscope.
+   * **YZ and XZ Profiles**: Longitudinal cross-sections of the track walls.
+
+### 💻 Programmatic Usage
+Let's run a single track simulation programmatically and plot these exact four views:
+
+======================================================================
+MARKDOWN CELL 08
+======================================================================
+<a id="section4"></a>
+## 🗄️ Section 4: Generating and Using Look-Up Tables (LUT)
+
+Generating individual tracks is physically detailed but computationally expensive because of numerical integration and vector ray tracing. To process millions of particles, we precompute a **Look-Up Table (LUT)** in a grid of energy and angles, and then use **fast interpolation** to look up track parameters in milliseconds.
+
+### 🖥️ GUI Usage (Mode 3 & Mode 6)
+* **Mode 3 (Reference LUT)**: Go to the **3: Reference Dataset** tab, enter energy/angle ranges, and click **Generate** to export a CSV.
+* **Mode 6 (LUT Simulation)**: Go to the **6: LUT Simulation** tab, load the generated CSV, and query track properties instantly or run inverse queries (finding energy/angle from track size).
+
+### 💻 Programmatic Usage
+Let's see how to generate a small LUT and query/interpolate values from it using `LUTEngine`:
+
+======================================================================
+MARKDOWN CELL 10
+======================================================================
+<a id="section5"></a>
+## 🚀 Section 5: Processing Monte Carlo (FLUKA) Simulations
+
+A major feature of TrackLab is the ability to process full phase-space output files from Monte Carlo codes like FLUKA.
+
+### 🖥️ GUI Usage (Mode 4: FLUKA Process)
+1. Navigate to the **4: FLUKA Process** tab.
+2. Click **Browse** and select the input file (e.g., `AmBe_01001_Phase-space_BXDRAW.txt`).
+3. Click **Process File**.
+4. The GUI reads the particle coordinates and direction cosines, computes the entry angle and corrected etching time (reducing etching time if the particle started below the detector surface), and outputs a CSV containing track dimensions for all developed tracks.
+
+### 💻 Programmatic Usage
+Let's see how to parse a FLUKA phase-space file programmatically and examine the first few processed tracks:
+
+======================================================================
+MARKDOWN CELL 12
+======================================================================
+## 🚀 Section 6: Advanced Multi-Ion FLUKA Processing (Beta)
+
+TrackLab now supports an advanced multi-ion processing mode for complex neutron simulations where multiple charged particles are tracked (e.g., protons, alphas, heavy recoils like C, O).
+
+### Using the `mgdraw_beta.f` Routine
+Instead of the default Phase-Space output, use the `mgdraw_beta.f` routine (available in `K:\Mele\Software\Fluka\Routines\Subroutine - all ions debug`). This routine generates a single file, `remlayer_events.dat`, containing exactly the start points of all charged particles born inside or crossing the dosimeter layer.
+
+### File Format (`remlayer_events.dat`)
+The output has 9 columns:
+1. **NCASE**: Event number
+2. **Type**: `1`=BORN, `2`=IN_FW, `3`=IN_BW, `4`=STOP_OR_RECOIL
+3. **Particle Name**
+4. **Z**: Atomic number
+5. **A**: Mass number
+6. **Kinetic Energy**: [GeV]
+7. **Z_POS**: Position [cm]
+8. **CZ_DIR**: Direction cosine
+9. **Comment**: Origin info
+
+### 🖥️ GUI Usage (Beta Mode)
+1. Go to the **4: FLUKA** tab.
+2. Load your `remlayer_events.dat` file.
+3. Check the box: **Beta: Multi-Ion Mode (Advanced MGDRAW)**.
+4. Click **Run Fluka Processing**.
+The engine will automatically map the `Z` values to the correct ions (`protons, alpha, Li, C, O`), bypass any single-ion deduplication, and compute the tracks accurately.

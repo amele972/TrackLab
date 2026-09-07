@@ -1,0 +1,48 @@
+===============================================================
+  HOW TO RUN TRACKLAB
+  Nuclear Track Detector Analysis
+===============================================================
+
+  REQUIREMENTS:
+    - Python 3.9 or later
+    - Required Python packages: numpy, scipy, matplotlib, pandas, PyQt6, openpyxl
+
+  Step 1 — Install dependencies:
+
+      pip install -e .
+
+      (Or manually: pip install numpy scipy matplotlib pandas PyQt6 openpyxl)
+
+  Step 2 — Launch the GUI:
+
+      python run_gui.py
+
+
+───────────────────────────────────────────────────────────────
+  FIRST TIME IN THE APP?
+───────────────────────────────────────────────────────────────
+
+  When TrackLab opens, a Configuration Summary will appear
+  showing the active V(y) physics models:
+
+    Protons : Nikezic / Double-Exponential (Model 1)  <- default
+    Alpha   : Hermsdorf (2009) (Model 5)              <- default
+    Li, C, O: Broken Power Law (BPL) — automatic
+
+  If these match your experiment, click "Got it, Launch TrackLab!"
+
+  To change models at any time:
+    -> Go to the Configuration tab (Mode 7) in the app
+    -> Or use Help -> Show Configuration Summary (F1)
+
+
+───────────────────────────────────────────────────────────────
+  NEED HELP?
+───────────────────────────────────────────────────────────────
+
+  User Guide (full):  TrackLab_User_Guide.ipynb
+                      (requires Jupyter Notebook to open)
+
+  Physics reference:  docs\PHYSICS_MODEL.md
+
+===============================================================

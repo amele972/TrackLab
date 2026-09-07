@@ -18,10 +18,10 @@ import os
 # VB is the etching rate in the bulk (undamaged) detector material.
 VB_BY_ION = {
     "protons": 4.7,  # Proton: ~4.7 µm/h in CR-39
-    "C": 1.73,  # Carbon: ~1.73 µm/h
-    "O": 1.73,  # Oxygen: ~1.73 µm/h
-    "Li": 1.73,  # Lithium: ~1.73 µm/h
-    "alpha": 1.73,  # Alpha (He-4): ~1.73 µm/h
+    "C": 4.7,  # Carbon
+    "O": 4.7,  # Oxygen
+    "Li": 4.7,  # Lithium
+    "alpha": 4.7,  # Alpha (He-4)
 }
 
 # Default/fallback value (proton)
@@ -117,7 +117,7 @@ ALPHA_MODELS_INFO = {
     },
     5: {
         "name": "Hermsdorf (2009)",
-        "formula": "1 + (a1/(a2+y)**b1) * (1-exp(-y/a4)) * (ln(y+a3) + y/a5)",
+        "formula": "1 + (a1/(a2+y)**b1) * (1-exp(-y/a4)) * ln(y+a3) + y/a5",
         "p": {"a1": 390.0, "a2": 2.0, "a3": 1.0, "a4": 5.0, "a5": 80.0, "b1": 2.35},
     },
     6: {

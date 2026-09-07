@@ -172,9 +172,14 @@ def alpha_vt_function(y, model_index=None):
 
     elif model_index == 5:
         # 5: Hermsdorf (2009)
-        v = 1.0 + (p["a1"] / (p["a2"] + y) ** p["b1"]) * (
-            1.0 - np.exp(-y / p["a4"])
-        ) * (np.log(y + p["a3"]) + y / p["a5"])
+        term2 = (
+            p["a1"]
+            / ((y_safe + p["a2"]) ** p["b1"])
+            * np.log(y_safe + p["a3"])
+            * (1.0 - np.exp(-y_safe / p["a4"]))
+        )
+        term3 = y_safe / p["a5"]
+        v = 1.0 + term2 + term3
 
     elif model_index == 6:
         # 6: Green et al. (1982)

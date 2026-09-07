@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
     QTabWidget,
 )
 
+from .config_summary import ConfigSummaryDialog, set_skip_summary
 from .param_panel import ParamPanel
 from .styles import THEMES, get_stylesheet
 from .tab_3d_enhanced import Enhanced3DTab
@@ -59,6 +60,17 @@ class TrackLabMainWindow(QMainWindow):
             self._theme_actions[theme] = action
 
         help_menu = menubar.addMenu("Help")
+
+        summary_action = QAction("Show Configuration Summary", self)
+        summary_action.setShortcut("F1")
+        summary_action.setToolTip(
+            "Re-open the startup physics configuration summary"
+        )
+        summary_action.triggered.connect(self._show_config_summary)
+        help_menu.addAction(summary_action)
+
+        help_menu.addSeparator()
+
         about_action = QAction("About", self)
         about_action.triggered.connect(self._about)
         help_menu.addAction(about_action)
@@ -129,6 +141,13 @@ class TrackLabMainWindow(QMainWindow):
             "<b>GUI:</b> 7 modes with shared parameter panel<br>"
             "<b>Framework:</b> PyQt6 + Matplotlib + NumPy/SciPy<br>",
         )
+
+    def _show_config_summary(self):
+        """Re-open the configuration summary dialog (Help → F1)."""
+        # Reset the skip flag so the dialog re-enables itself for next launch
+        set_skip_summary(False)
+        dlg = ConfigSummaryDialog(theme=self._current_theme, parent=self)
+        dlg.exec()
 
     def _set_theme(self, theme):
         """Switch the active theme."""
