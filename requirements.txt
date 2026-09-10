@@ -1,6 +1,0 @@
-numpy>=1.22
-scipy>=1.9
-matplotlib>=3.5
-pandas>=1.4
-PyQt6>=6.4
-openpyxl>=3.0

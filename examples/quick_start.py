@@ -10,33 +10,19 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 def example_proton():
     """Compute a single proton track."""
-    from tracklab import (
-        load_srim_data, build_vrint_interpolator, get_vt_model,
-        calculate_track_parameters, get_vb_for_ion,
-    )
+    from tracklab import calculate_track_parameters, get_vb_for_ion
 
     print("\n=== Example: Proton Track ===")
 
-    # Load SRIM data
-    interps, _ = load_srim_data()
-    vt_model   = get_vt_model()
-
-    # Parameters
     ion    = 'protons'
     energy = 1.5    # MeV
     angle  = 75.0   # degrees
     vb     = get_vb_for_ion(ion)  # 4.7 µm/h
     time   = 2.83   # hours
 
-    # Build V(y) integral interpolator
-    F_interp = build_vrint_interpolator(
-        vt_model=vt_model, ion=ion, energy=energy, vb=vb)
-
-    # Calculate track
+    # Calculate track (interpolators handled automatically internally)
     result = calculate_track_parameters(
-        energy=energy, angle_deg=angle, vb=vb, time_etching=time,
-        range_interpolator=interps[ion], F_interp=F_interp,
-        ion=ion, vt_model=vt_model,
+        energy_MeV_u=energy, angle_deg=angle, vb_um_h=vb, time_etching_h=time, ion=ion
     )
 
     print(f"  Ion:        {ion}")
@@ -52,15 +38,9 @@ def example_proton():
 
 def example_carbon():
     """Compute a single Carbon ion track."""
-    from tracklab import (
-        load_srim_data, build_vrint_interpolator, get_vt_model,
-        calculate_track_parameters, get_vb_for_ion,
-    )
+    from tracklab import calculate_track_parameters, get_vb_for_ion
 
     print("\n=== Example: Carbon Track ===")
-
-    interps, _ = load_srim_data()
-    vt_model   = get_vt_model()
 
     ion    = 'C'
     energy = 14.8   # MeV
@@ -68,13 +48,8 @@ def example_carbon():
     vb     = get_vb_for_ion(ion)  # 1.73 µm/h
     time   = 5.0    # hours
 
-    F_interp = build_vrint_interpolator(
-        vt_model=vt_model, ion=ion, energy=energy, vb=vb)
-
     result = calculate_track_parameters(
-        energy=energy, angle_deg=angle, vb=vb, time_etching=time,
-        range_interpolator=interps[ion], F_interp=F_interp,
-        ion=ion, vt_model=vt_model,
+        energy_MeV_u=energy, angle_deg=angle, vb_um_h=vb, time_etching_h=time, ion=ion
     )
 
     print(f"  Ion:        {ion}")
@@ -120,4 +95,4 @@ if __name__ == '__main__':
     example_proton()
     example_carbon()
     example_vy_comparison()
-    print("\n✓ All examples completed successfully!")
+    print("\nAll examples completed successfully!")

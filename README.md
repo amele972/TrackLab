@@ -96,23 +96,15 @@ Here is a quick script demonstrating how to calculate track parameters programma
 
 ```python
 import numpy as np
-from tracklab.load_srim_data import load_srim_data
-from tracklab.vt_utils import build_vrint_interpolator
-from tracklab.vt_multiion import get_model
 from tracklab.calculate_track_parameter import calculate_track_parameters
 
-# 1. Load range tables and initialize multi-ion physics model
-interps, _ = load_srim_data()
-vt_model = get_model()
-
-# 2. Precompute the cumulative etch-rate integral
-F = build_vrint_interpolator(vt_model=vt_model, ion='protons', energy=1.5, vb=4.7)
-
-# 3. Calculate track parameters for a 1.5 MeV proton at 75° incidence
+# Calculate track parameters for a 1.5 MeV proton at 75° incidence
 res = calculate_track_parameters(
-    energy=1.5, angle_deg=75.0, vb=4.7, time_etching=2.83,
-    range_interpolator=interps['protons'], F_interp=F,
-    ion='protons', vt_model=vt_model
+    energy_MeV_u=1.5, 
+    angle_deg=75.0, 
+    vb_um_h=4.7, 
+    time_etching_h=2.83,
+    ion='protons'
 )
 
 print(f"Status: {res['status']}")
@@ -120,6 +112,19 @@ print(f"Depth:  {res['depth_um']:.4f} um")
 print(f"Major Axis: {res['major_axis_um']:.4f} um")
 print(f"Minor Axis: {res['minor_axis_um']:.4f} um")
 ```
+
+---
+
+## 🛠️ Configuration & GUI
+
+When TrackLab GUI opens for the first time, a Configuration Summary will appear showing the active V(y) physics models:
+
+- **Protons** : Nikezic / Double-Exponential (Model 1) <- default
+- **Alpha**   : Hermsdorf (2009) (Model 5) <- default
+- **Li, C, O**: Broken Power Law (BPL) — automatic
+
+If these match your experiment, click "Got it, Launch TrackLab!". 
+To change models at any time, go to the Configuration tab (Mode 7) in the app or use `Help -> Show Configuration Summary (F1)`.
 
 ---
 

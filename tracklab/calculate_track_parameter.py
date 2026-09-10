@@ -52,10 +52,10 @@ def _intersect_surface(x1i, y1i, x2i, y2i, theta_rad, removed):
 
 
 def calculate_track_parameters(
-    energy=None,
+    energy_MeV_u=None,
     angle_deg=None,
-    vb=None,
-    time_etching=None,
+    vb_um_h=None,
+    time_etching_h=None,
     range_interpolator=None,
     F_interp=None,
     ion=None,
@@ -63,28 +63,29 @@ def calculate_track_parameters(
     is_bottom_track: bool = False,
     debug: bool = False,
     plot: bool = False,
+    **kwargs
 ):
     """
     Calculate complete track parameters for one ion at one (energy, angle).
 
     Parameters (v1.0 — Multi-Ion API)
     ----------
-    energy : float
-        Ion kinetic energy (MeV).
+    energy_MeV_u : float
+        Ion kinetic energy (MeV/u or MeV for protons).
     angle_deg : float
         Incident angle (degrees, 0-90).  90 = normal incidence.
-    vb : float
+    vb_um_h : float
         Bulk etch rate (µm/h).
-    time_etching : float
+    time_etching_h : float
         Etching time (hours).
-    range_interpolator : PchipInterpolator
-        SRIM range interpolator from load_srim_data().
-    F_interp : PchipInterpolator
-        Cumulative VT integral from build_vrint_interpolator().
+    range_interpolator : PchipInterpolator, optional
+        SRIM range interpolator. Calculated internally if None.
+    F_interp : PchipInterpolator, optional
+        Cumulative VT integral. Calculated internally if None.
     ion : str, optional
         Ion symbol ('protons', 'Li', 'C', 'O'). Default='protons'.
     vt_model : VTMultiIonModel, optional
-        Multi-ion V(y) model. If None, uses legacy proton model.
+        Multi-ion V(y) model. Calculated internally if None.
     debug : bool
         Print diagnostic output.
 
@@ -92,9 +93,37 @@ def calculate_track_parameters(
     -------
     dict with keys mapping physical parameters to their µm values.
     """
+    # Backward compatibility for parameter names
+    energy = energy_MeV_u if energy_MeV_u is not None else kwargs.get("energy")
+    vb = vb_um_h if vb_um_h is not None else kwargs.get("vb")
+    time_etching = time_etching_h if time_etching_h is not None else kwargs.get("time_etching")
+
     # Default ion to proton for backward compatibility
     if ion is None:
         ion = "protons"
+
+    # Auto-initialize backend models if not provided (Steps 1 and 2 in background)
+    if range_interpolator is None or vt_model is None or F_interp is None:
+        from .load_srim_data import load_srim_data
+        from .vt_multiion import get_model
+        from .vt_utils import build_vrint_interpolator
+
+        # Cache models globally in this module to prevent reloading SRIM tables on every call
+        global _global_srim_interps, _global_vt_model
+        try:
+            _ = _global_srim_interps
+        except NameError:
+            _global_srim_interps, _ = load_srim_data()
+            _global_vt_model = get_model()
+
+        if vt_model is None:
+            vt_model = _global_vt_model
+        if range_interpolator is None:
+            range_interpolator = _global_srim_interps[ion]
+        if F_interp is None:
+            F_interp = build_vrint_interpolator(
+                vt_model=vt_model, ion=ion, energy=energy, vb=vb
+            )
 
     # Create a V(y) = VT(y)/VB_user wrapper.
     if vt_model is not None:

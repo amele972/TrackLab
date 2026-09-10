@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Mele"
+  given-names: "A."
+  affiliation: "TrackLab Team"
+title: "TrackLab: Nuclear Track Analysis in PADC (CR-39)"
+version: 1.0.0
+date-released: 2026-09-10
+url: "https://github.com/amele972/TrackLab"
+repository-code: "https://github.com/amele972/TrackLab"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Nikezic"
+    given-names: "D."
+  - family-names: "Yu"
+    given-names: "K. N."
+  title: "A computer program TRACK_p for studying proton tracks in PADC detectors"
+  journal: "SoftwareX"
+  volume: 5
+  start: 74
+  end: 79
+  year: 2016
+  doi: "10.1016/j.softx.2016.04.006"
