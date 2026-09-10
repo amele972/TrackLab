@@ -9,9 +9,28 @@
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Tests](https://img.shields.io/badge/tests-pytest-brightgreen.svg)](tests/)
 [![DOI](https://zenodo.org/badge/1252472373.svg)](https://zenodo.org/badge/latestdoi/1252472373)
+
 **TrackLab** is a Python package that simulates the formation of tracks during chemical etching from latent trails left by charged particles (protons, alpha particles, lithium, carbon, oxygen) in CR-39 plastic detectors, and models their optical appearance under a transmission microscope.
 
 It acts as a physical bridge between Monte Carlo particle transport simulations (e.g. FLUKA, GEANT4) and physical detector observations.
+
+---
+
+## ⚡ Quick Download — No Installation Required
+
+> **Just want to run the app?** Download the standalone Windows executable — no Python, no command line, no setup needed.
+
+<p align="center">
+  <a href="https://github.com/amele972/TrackLab/releases/latest">
+    <img src="https://img.shields.io/badge/Download-TrackLab.exe-blue?style=for-the-badge&logo=windows" alt="Download TrackLab.exe">
+  </a>
+</p>
+
+1. Go to the [**Releases page**](https://github.com/amele972/TrackLab/releases/latest)
+2. Download `TrackLab.exe` under **Assets**
+3. Double-click to launch the GUI — that's it! ✅
+
+> **Note:** Windows may show a SmartScreen warning on first launch since the app is not yet signed. Click "More info" → "Run anyway".
 
 ---
 

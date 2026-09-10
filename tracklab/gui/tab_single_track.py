@@ -193,6 +193,7 @@ class SingleTrackTab(QWidget):
             f"3D — {ion} {energy:.2f} MeV, {angle:.1f}°",
             color=c["text"],
             fontweight="bold",
+            pad=15,
         )
         ax1.set_xlabel("X (µm)")
         ax1.set_ylabel("Y (µm)")
@@ -320,7 +321,7 @@ class SingleTrackTab(QWidget):
         ax4.set_ylabel("Z (µm)")
         ax4.tick_params(colors=c["muted"])
         ax4.grid(True, alpha=0.2, color=c["grid"])
-        self.fig.tight_layout()
+        self.fig.tight_layout(pad=2.0)
         self.canvas.draw()
 
     def _export(self):

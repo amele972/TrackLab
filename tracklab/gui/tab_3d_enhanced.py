@@ -49,7 +49,10 @@ def _plot_4panel(fig, ion, energy, angle, X, Y, Z, B, colors=None):
     ax1.set_ylim(lim_y)
     ax1.set_zlim(lim_z)
     ax1.set_title(
-        f"3D: {ion} {energy:.2f} MeV, {angle:.1f}°", fontweight="bold", color=c["text"]
+        f"3D: {ion} {energy:.2f} MeV, {angle:.1f}°",
+        fontweight="bold",
+        color=c["text"],
+        pad=15,
     )
     ax1.set_xlabel("X (µm)")
     ax1.set_ylabel("Y (µm)")
@@ -106,7 +109,7 @@ def _plot_4panel(fig, ion, energy, angle, X, Y, Z, B, colors=None):
         ax.tick_params(colors=c["muted"])
         ax.grid(True, alpha=0.2, color=c["grid"])
 
-    fig.tight_layout()
+    fig.tight_layout(pad=2.0)
 
 
 class Enhanced3DTab(QWidget):

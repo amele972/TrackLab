@@ -327,8 +327,8 @@ class ReferenceTab(QWidget):
             ax.plot_surface(E, A, grid, cmap="plasma", alpha=0.85)
             ax.set_xlabel("E (MeV)")
             ax.set_ylabel("Angle (°)")
-            ax.set_title(label, color=c["text"])
-        self.plot3d_fig.tight_layout()
+            ax.set_title(label, color=c["text"], pad=15)
+        self.plot3d_fig.tight_layout(pad=2.0)
         self.plot3d.draw()
 
     def _plot_analysis(self):
