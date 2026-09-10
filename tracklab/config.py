@@ -148,9 +148,13 @@ Z_REF = -0.55
 # SRIM DATA  (unified range table with ALL ions)
 # ============================================================================
 
+import sys
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _DATA_DIR = os.path.join(_HERE, "data")
-_PROJECT_ROOT = os.path.dirname(_HERE)
+if getattr(sys, 'frozen', False):
+    _PROJECT_ROOT = os.path.dirname(sys.executable)
+else:
+    _PROJECT_ROOT = os.path.dirname(_HERE)
 
 SRIM_FILENAME = os.path.join(_DATA_DIR, "Rang_CR_all_ions_SRIM.dat")
 SRIM_MAX_ENERGY = 30.0  # MeV — extend table via Bragg-Kleeman power law
