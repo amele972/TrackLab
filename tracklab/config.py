@@ -9,6 +9,7 @@ Supported ions: protons, Li, C, O, alpha
 """
 
 import os
+import sys
 
 # ============================================================================
 # PHYSICAL PARAMETERS — ION-SPECIFIC BULK ETCH RATES
@@ -148,10 +149,9 @@ Z_REF = -0.55
 # SRIM DATA  (unified range table with ALL ions)
 # ============================================================================
 
-import sys
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _DATA_DIR = os.path.join(_HERE, "data")
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     _PROJECT_ROOT = os.path.dirname(sys.executable)
 else:
     _PROJECT_ROOT = os.path.dirname(_HERE)
