@@ -159,3 +159,6 @@ Desktop.ini
 
 # Project-specific ignores
 .qodo/
+
+# PyInstaller standalone executable (distributed via GitHub Releases, not committed to git)
+TrackLab.exe
