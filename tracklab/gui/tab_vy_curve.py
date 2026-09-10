@@ -19,8 +19,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from .styles import get_plot_colors
 from tracklab.config import SUPPORTED_IONS
+
+from .styles import get_plot_colors
 
 ALPHA_MODEL_NAMES = [
     "Durrani & Bull (1987)",
@@ -69,12 +70,12 @@ class VyCurveTab(QWidget):
 
         # Controls
         ctrl = QHBoxLayout()
-        
+
         ctrl.addWidget(QLabel("Ion:"))
         self.ion_combo = QComboBox()
         self.ion_combo.addItems(list(SUPPORTED_IONS))
         ctrl.addWidget(self.ion_combo)
-        
+
         ctrl.addWidget(QLabel("y max (µm):"))
         self.ymax_spin = QDoubleSpinBox()
         self.ymax_spin.setValue(50.0)

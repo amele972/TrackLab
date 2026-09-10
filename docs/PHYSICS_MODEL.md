@@ -17,7 +17,7 @@ When an ion of a given initial energy $E$ enters the detector, its projected ran
    where $p \approx 1.77$ for protons and light ions.
 
 ### B. The Etch Rate Ratio $V(y)$ function
-Chemical etching removes the undamaged bulk detector material at a constant rate $v_B$ (bulk etch rate, $\mu\text{m/h}$). Along the particle path, radiation damage increases the local dissolution rate to $v_T$ (track etch rate, $\mu\text{m/h}$). 
+Chemical etching removes the undamaged bulk detector material at a constant rate $v_B$ (bulk etch rate, $\mu\text{m/h}$). Along the particle path, radiation damage increases the local dissolution rate to $v_T$ (track etch rate, $\mu\text{m/h}$).
 
 The geometry of the etched track is governed by the reduced etch-rate ratio:
 $$V(y) = \frac{v_T(y)}{v_B} \ge 1$$
@@ -113,7 +113,7 @@ Averaging the transmitted intensities of all cone rays for each mesh face yields
 
 ## 3. References
 
-The physical framework in TrackLab derives from the legacy TRACK_P and TRACK_VISION codes, with track etch rate parametrizations incorporating extensive literature models. 
+The physical framework in TrackLab derives from the legacy TRACK_P and TRACK_VISION codes, with track etch rate parametrizations incorporating extensive literature models.
 
 1. **TRACK_P (Proton Tracks):** D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, SoftwareX, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
 2. **TRACK_VISION (Optical Simulation):** D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, Computer Physics Communications, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)

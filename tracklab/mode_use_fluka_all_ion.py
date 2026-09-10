@@ -6,14 +6,16 @@ containing multiple ions (Protons, Alpha, Carbon, Oxygen).
 """
 
 import csv
+
 import numpy as np
 
 from .calculate_track_parameter import calculate_track_parameters
 from .config import TIME_ETCHING, get_vb_for_ion
 from .load_srim_data import load_srim_data
+from .utils import compute_etching_time
 from .vt_multiion import get_model
 from .vt_utils import build_vrint_interpolator
-from .utils import compute_etching_time
+
 
 def run_mode_fluka_all_ion(
     input_file=None,
@@ -29,7 +31,7 @@ def run_mode_fluka_all_ion(
     if output_csv is None:
         output_csv = "fluka_results_all_ions.csv"
 
-    print(f"\nMode: FLUKA Unified Processing (All Ions)")
+    print("\nMode: FLUKA Unified Processing (All Ions)")
     print(f"  File: {input_file}")
 
     # Load SRIM data for all supported ions
@@ -37,18 +39,14 @@ def run_mode_fluka_all_ion(
     vt_model = get_model()
 
     # Z to Ion mapping
-    z_to_ion = {
-        1: "protons",
-        2: "alpha",
-        3: "Li",
-        6: "C",
-        8: "O"
-    }
+    z_to_ion = {1: "protons", 2: "alpha", 3: "Li", 6: "C", 8: "O"}
 
     # Read lines and skip comments/headers
     with open(input_file, "r") as f:
-        lines = [line.strip() for line in f if line.strip() and not line.startswith('#')]
-    
+        lines = [
+            line.strip() for line in f if line.strip() and not line.startswith("#")
+        ]
+
     lines = lines[skip_header:]
     total = len(lines)
     print(f"  {total} particles found (excluding headers)")
@@ -63,7 +61,7 @@ def run_mode_fluka_all_ion(
             if len(parts) < 9:
                 skipped += 1
                 continue
-            
+
             ncase = int(parts[0])
             event_type = int(parts[1])  # 1=BORN, 2=IN_FW, 3=IN_BW, 4=STOP
             part_name = parts[2]
@@ -75,7 +73,7 @@ def run_mode_fluka_all_ion(
             comment = parts[8]
 
             # 1. Skip if it's a stopping event (we only care about track start)
-            if event_type == 4 or comment == 'STOPPING_TRK':
+            if event_type == 4 or comment == "STOPPING_TRK":
                 skipped += 1
                 continue
 
@@ -90,15 +88,17 @@ def run_mode_fluka_all_ion(
             if energy_mev <= 0:
                 skipped += 1
                 continue
-            
+
             cosz = np.clip(cz_dir, -1.0, 1.0)
             # The angle should be relative to the surface
             angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
 
             vb = get_vb_for_ion(ion_name)
             range_interp = interps[ion_name]
-            
-            etching_time_particle = compute_etching_time(z_pos, vb=vb, t_ref=time_etching, cosz=cosz)
+
+            etching_time_particle = compute_etching_time(
+                z_pos, vb=vb, t_ref=time_etching, cosz=cosz
+            )
             if etching_time_particle <= 0:
                 skipped += 1
                 continue
@@ -106,7 +106,7 @@ def run_mode_fluka_all_ion(
             F_interp = build_vrint_interpolator(
                 vt_model=vt_model, ion=ion_name, energy=energy_mev, vb=vb
             )
-            
+
             res = calculate_track_parameters(
                 energy=energy_mev,
                 angle_deg=angle_deg,
@@ -118,7 +118,7 @@ def run_mode_fluka_all_ion(
                 vt_model=vt_model,
                 is_bottom_track=(cosz < 0),
             )
-            
+
             results.append(
                 {
                     "ncase": ncase,
@@ -134,8 +134,8 @@ def run_mode_fluka_all_ion(
             )
             if res.get("indicator", -1) == 1:
                 developed += 1
-                
-        except Exception as e:
+
+        except Exception:
             skipped += 1
 
         if (idx + 1) % max(1, total // 10) == 0:
@@ -150,8 +150,10 @@ def run_mode_fluka_all_ion(
         print(f"  Saved to: {output_csv}")
     return results
 
+
 if __name__ == "__main__":
     import sys
+
     # For quick testing from CLI
     if len(sys.argv) > 1:
         run_mode_fluka_all_ion(input_file=sys.argv[1])

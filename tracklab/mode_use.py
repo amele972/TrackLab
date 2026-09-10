@@ -300,7 +300,10 @@ def run_mode4_fluka(
             angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
 
             from .utils import compute_etching_time
-            etching_time_particle = compute_etching_time(z_val, vb=vb, t_ref=time_etching, cosz=cosz)
+
+            etching_time_particle = compute_etching_time(
+                z_val, vb=vb, t_ref=time_etching, cosz=cosz
+            )
             if etching_time_particle <= 0:
                 skipped += 1
                 continue

@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QIcon
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -48,9 +48,7 @@ def _load_prefs() -> dict:
 def _save_prefs(prefs: dict) -> None:
     """Write preferences back to ~/.tracklab_config.json."""
     try:
-        _CONFIG_FILE.write_text(
-            json.dumps(prefs, indent=2), encoding="utf-8"
-        )
+        _CONFIG_FILE.write_text(json.dumps(prefs, indent=2), encoding="utf-8")
     except Exception:
         pass
 
@@ -68,6 +66,7 @@ def set_skip_summary(skip: bool) -> None:
 
 
 # ── Dialog ────────────────────────────────────────────────────────────────────
+
 
 class ConfigSummaryDialog(QDialog):
     """
@@ -224,13 +223,15 @@ class ConfigSummaryDialog(QDialog):
         p_formula = p_info.get("formula", "")
         is_p_default = PROTON_VT_MODEL == 1
         p_tag = "  ★ Recommended default" if is_p_default else ""
-        cl.addWidget(_card(
-            "Proton  V(y) Model",
-            [
-                ("Model:", f"Model {PROTON_VT_MODEL} — {p_name}{p_tag}", "accent"),
-                ("Formula:", p_formula, "muted"),
-            ],
-        ))
+        cl.addWidget(
+            _card(
+                "Proton  V(y) Model",
+                [
+                    ("Model:", f"Model {PROTON_VT_MODEL} — {p_name}{p_tag}", "accent"),
+                    ("Formula:", p_formula, "muted"),
+                ],
+            )
+        )
 
         # — Alpha V(y) model card —
         a_info = ALPHA_MODELS_INFO.get(ALPHA_VT_MODEL, {})
@@ -238,35 +239,45 @@ class ConfigSummaryDialog(QDialog):
         a_formula = a_info.get("formula", "")
         is_a_default = ALPHA_VT_MODEL == 5
         a_tag = "  ★ Recommended default" if is_a_default else ""
-        cl.addWidget(_card(
-            "Alpha  V(y) Model",
-            [
-                ("Model:", f"Model {ALPHA_VT_MODEL} — {a_name}{a_tag}", "accent5"),
-                ("Formula:", a_formula, "muted"),
-            ],
-        ))
+        cl.addWidget(
+            _card(
+                "Alpha  V(y) Model",
+                [
+                    ("Model:", f"Model {ALPHA_VT_MODEL} — {a_name}{a_tag}", "accent5"),
+                    ("Formula:", a_formula, "muted"),
+                ],
+            )
+        )
 
         # — Li / C / O —
-        cl.addWidget(_card(
-            "Heavy Ions  (Li, C, O)",
-            [
-                (
-                    "Method:",
-                    "Broken Power Law (BPL) — fitted to experimental data.  No selection needed.",
-                    "green",
-                ),
-            ],
-        ))
+        cl.addWidget(
+            _card(
+                "Heavy Ions  (Li, C, O)",
+                [
+                    (
+                        "Method:",
+                        "Broken Power Law (BPL) — fitted to experimental data.  No selection needed.",
+                        "green",
+                    ),
+                ],
+            )
+        )
 
         # — Etching parameters —
         vb_proton = VB_BY_ION.get("protons", 4.7)
-        cl.addWidget(_card(
-            "Etching Parameters",
-            [
-                ("VB (protons):", f"{vb_proton:.3f}  µm/h  (CR-39 standard)", "accent2"),
-                ("Etching time:", f"{TIME_ETCHING:.3f}  h", "accent2"),
-            ],
-        ))
+        cl.addWidget(
+            _card(
+                "Etching Parameters",
+                [
+                    (
+                        "VB (protons):",
+                        f"{vb_proton:.3f}  µm/h  (CR-39 standard)",
+                        "accent2",
+                    ),
+                    ("Etching time:", f"{TIME_ETCHING:.3f}  h", "accent2"),
+                ],
+            )
+        )
 
         cl.addStretch()
 
@@ -313,6 +324,7 @@ class ConfigSummaryDialog(QDialog):
                 subprocess.Popen(["xdg-open", str(_NOTEBOOK)])
         except Exception as exc:
             from PyQt6.QtWidgets import QMessageBox
+
             QMessageBox.warning(
                 self,
                 "Cannot open notebook",
@@ -326,67 +338,67 @@ class ConfigSummaryDialog(QDialog):
         c = self._c
         self.setStyleSheet(f"""
             ConfigSummaryDialog {{
-                background-color: {c('bg')};
+                background-color: {c("bg")};
             }}
 
             /* ── Overall dialog background ── */
             QDialog {{
-                background-color: {c('bg')};
+                background-color: {c("bg")};
             }}
 
             /* ── Warning banner ── */
             QFrame[role="warn"] {{
-                background-color: {c('warn_bg')};
-                border: 1px solid {c('warn_border')};
+                background-color: {c("warn_bg")};
+                border: 1px solid {c("warn_border")};
                 border-radius: 6px;
             }}
             QLabel[role="warn_text"] {{
-                color: {c('text')};
+                color: {c("text")};
                 font-size: 11px;
             }}
 
             /* ── Info cards ── */
             QFrame[role="card"] {{
-                background-color: {c('card')};
-                border: 1px solid {c('border')};
+                background-color: {c("card")};
+                border: 1px solid {c("border")};
                 border-radius: 8px;
             }}
             QLabel[role="section_title"] {{
-                color: {c('accent')};
+                color: {c("accent")};
                 margin-bottom: 4px;
             }}
             QLabel[role="row_label"] {{
-                color: {c('muted')};
+                color: {c("muted")};
                 font-size: 11px;
                 min-width: 90px;
             }}
 
             /* Generic label colour fallback */
             QLabel {{
-                color: {c('text')};
+                color: {c("text")};
                 background: transparent;
             }}
 
             QCheckBox {{
-                color: {c('muted')};
+                color: {c("muted")};
                 font-size: 11px;
             }}
             QCheckBox::indicator {{
-                border: 1px solid {c('border')};
+                border: 1px solid {c("border")};
                 border-radius: 3px;
                 width: 14px;
                 height: 14px;
-                background: {c('card')};
+                background: {c("card")};
             }}
             QCheckBox::indicator:checked {{
-                background: {c('accent')};
-                border-color: {c('accent')};
+                background: {c("accent")};
+                border-color: {c("accent")};
             }}
 
             /* ── Buttons ── */
             QPushButton[role="primary"] {{
-                background-color: {c('btn_primary')};
-                color: {c('btn_primary_text')};
+                background-color: {c("btn_primary")};
+                color: {c("btn_primary_text")};
                 border: none;
                 border-radius: 6px;
                 padding: 8px 18px;
@@ -397,9 +409,9 @@ class ConfigSummaryDialog(QDialog):
                 opacity: 0.9;
             }}
             QPushButton[role="secondary"] {{
-                background-color: {c('btn_secondary')};
-                color: {c('btn_secondary_text')};
-                border: 1px solid {c('border')};
+                background-color: {c("btn_secondary")};
+                color: {c("btn_secondary_text")};
+                border: 1px solid {c("border")};
                 border-radius: 6px;
                 padding: 8px 14px;
                 font-size: 11px;
@@ -414,9 +426,9 @@ class ConfigSummaryDialog(QDialog):
             }}
             /* keep cards opaque */
             QFrame[role="card"] {{
-                background-color: {c('card')};
+                background-color: {c("card")};
             }}
             QFrame[role="warn"] {{
-                background-color: {c('warn_bg')};
+                background-color: {c("warn_bg")};
             }}
         """)

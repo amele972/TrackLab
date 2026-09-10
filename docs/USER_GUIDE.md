@@ -77,13 +77,13 @@ F = build_vrint_interpolator(vt_model=vt_model, ion=ion, energy=energy, vb=vb)
 
 # 4. Run the high-fidelity geometry engine
 result = calculate_track_parameters(
-    energy=energy, 
-    angle_deg=angle, 
-    vb=vb, 
+    energy=energy,
+    angle_deg=angle,
+    vb=vb,
     time_etching=2.83,
-    range_interpolator=interps[ion], 
+    range_interpolator=interps[ion],
     F_interp=F,
-    ion=ion, 
+    ion=ion,
     vt_model=vt_model
 )
 

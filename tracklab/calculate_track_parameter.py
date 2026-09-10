@@ -63,7 +63,7 @@ def calculate_track_parameters(
     is_bottom_track: bool = False,
     debug: bool = False,
     plot: bool = False,
-    **kwargs
+    **kwargs,
 ):
     """
     Calculate complete track parameters for one ion at one (energy, angle).
@@ -96,7 +96,9 @@ def calculate_track_parameters(
     # Backward compatibility for parameter names
     energy = energy_MeV_u if energy_MeV_u is not None else kwargs.get("energy")
     vb = vb_um_h if vb_um_h is not None else kwargs.get("vb")
-    time_etching = time_etching_h if time_etching_h is not None else kwargs.get("time_etching")
+    time_etching = (
+        time_etching_h if time_etching_h is not None else kwargs.get("time_etching")
+    )
 
     # Default ion to proton for backward compatibility
     if ion is None:
@@ -484,7 +486,7 @@ def calculate_track_parameters(
             Z_surf = -Z_mesh
         else:
             X_surf, Y_surf, Z_surf = X_mesh, Y_mesh, Z_mesh
-            
+
         total_length_um = float(np.max(X_surf) - np.min(X_surf))
 
         optics_func = track_optics_p_optimized

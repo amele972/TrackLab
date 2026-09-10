@@ -255,7 +255,9 @@ class FlukaWorker(QThread):
                         continue
 
                     angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
-                    etching_time = compute_etching_time(z_val, vb=vb, t_ref=time_etching_ref, cosz=cosz)
+                    etching_time = compute_etching_time(
+                        z_val, vb=vb, t_ref=time_etching_ref, cosz=cosz
+                    )
                     if etching_time <= 0:
                         skipped += 1
                         continue
@@ -343,6 +345,7 @@ class GenericWorker(QThread):
         except Exception as e:
             self.error.emit(str(e))
 
+
 class FlukaMultiIonWorker(QThread):
     """Process FLUKA advanced phase-space file (Beta: Multi-Ion Mode)."""
 
@@ -375,18 +378,16 @@ class FlukaMultiIonWorker(QThread):
             vt_model = get_model()
 
             # Z to Ion mapping
-            z_to_ion = {
-                1: "protons",
-                2: "alpha",
-                3: "Li",
-                6: "C",
-                8: "O"
-            }
+            z_to_ion = {1: "protons", 2: "alpha", 3: "Li", 6: "C", 8: "O"}
 
             self.status_update.emit("Reading advanced FLUKA file…")
             with open(self.params["file"], "r") as f:
-                lines = [line.strip() for line in f if line.strip() and not line.startswith('#')]
-            
+                lines = [
+                    line.strip()
+                    for line in f
+                    if line.strip() and not line.startswith("#")
+                ]
+
             skip_header = self.params.get("skip_header", 1)
             # if the file had comment headers, we might have already skipped them.
             # but let's be safe:
@@ -395,7 +396,9 @@ class FlukaMultiIonWorker(QThread):
 
             total = len(lines)
             print(f"[FlukaMultiIonWorker] Processing file: {self.params['file']}")
-            print(f"[FlukaMultiIonWorker] Total particles found (excl headers): {total}")
+            print(
+                f"[FlukaMultiIonWorker] Total particles found (excl headers): {total}"
+            )
 
             results, processed, developed, skipped = [], 0, 0, 0
 
@@ -410,7 +413,7 @@ class FlukaMultiIonWorker(QThread):
                     if len(parts) < 9:
                         skipped += 1
                         continue
-                    
+
                     # New format:
                     # 1:EVENT 2:TYPE 3:PART_NAME 4:Z 5:A 6:EKIN_GEV 7:Z_POS 8:CZ_DIR 9:COMMENT
                     ncase = int(parts[0])
@@ -424,7 +427,7 @@ class FlukaMultiIonWorker(QThread):
                     comment = parts[8]
 
                     # 1. Skip stopping events (we only care about track start)
-                    if event_type == 4 or comment == 'STOPPING_TRK':
+                    if event_type == 4 or comment == "STOPPING_TRK":
                         skipped += 1
                         continue
 
@@ -435,8 +438,8 @@ class FlukaMultiIonWorker(QThread):
                         continue
 
                     range_interp = interps[ion_name]
-                    
-                    # Note: No deduplication logic needed here! The file correctly outputs 
+
+                    # Note: No deduplication logic needed here! The file correctly outputs
                     # multiple particles per event when they physically occur.
 
                     energy_mev = ekin_gev * 1000.0
@@ -446,8 +449,10 @@ class FlukaMultiIonWorker(QThread):
                         continue
 
                     angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
-                    etching_time = compute_etching_time(z_pos, vb=vb_global, t_ref=time_etching_ref, cosz=cosz)
-                    
+                    etching_time = compute_etching_time(
+                        z_pos, vb=vb_global, t_ref=time_etching_ref, cosz=cosz
+                    )
+
                     if etching_time <= 0:
                         skipped += 1
                         continue
@@ -467,12 +472,14 @@ class FlukaMultiIonWorker(QThread):
                         vt_model=vt_model,
                         is_bottom_track=(cosz < 0),
                     )
-                    
+
                     results.append(
                         {
                             "ion": ion_name,
                             "energy_MeV": energy_mev,
-                            "beam_energy_MeV": self.params.get("beam_energy_MeV", energy_mev),
+                            "beam_energy_MeV": self.params.get(
+                                "beam_energy_MeV", energy_mev
+                            ),
                             "angle_deg": angle_deg,
                             "z_cm": z_pos,
                             "etching_time_h": etching_time,
@@ -510,6 +517,6 @@ class FlukaMultiIonWorker(QThread):
 
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             self.error.emit(str(e))
-

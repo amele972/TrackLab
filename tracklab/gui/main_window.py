@@ -63,9 +63,7 @@ class TrackLabMainWindow(QMainWindow):
 
         summary_action = QAction("Show Configuration Summary", self)
         summary_action.setShortcut("F1")
-        summary_action.setToolTip(
-            "Re-open the startup physics configuration summary"
-        )
+        summary_action.setToolTip("Re-open the startup physics configuration summary")
         summary_action.triggered.connect(self._show_config_summary)
         help_menu.addAction(summary_action)
 

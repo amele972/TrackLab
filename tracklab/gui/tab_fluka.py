@@ -10,6 +10,7 @@ import re
 
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QFileDialog,
     QFrame,
     QHBoxLayout,
@@ -23,7 +24,6 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
-    QCheckBox,
 )
 
 from .workers import FlukaWorker
@@ -78,12 +78,14 @@ class FlukaTab(QWidget):
         self.skip_header.setValue(1)
         self.skip_header.setRange(0, 100)
         opts_row.addWidget(self.skip_header)
-        
+
         opts_row.addSpacing(20)
         self.beta_mode_cb = QCheckBox("Beta: Multi-Ion Mode (Advanced MGDRAW)")
-        self.beta_mode_cb.setToolTip("Enable this if you are using the new 'remlayer_events.dat' output format from the advanced multi-ion mgdraw_beta.f routine. It will automatically process ALL ions.")
+        self.beta_mode_cb.setToolTip(
+            "Enable this if you are using the new 'remlayer_events.dat' output format from the advanced multi-ion mgdraw_beta.f routine. It will automatically process ALL ions."
+        )
         opts_row.addWidget(self.beta_mode_cb)
-        
+
         opts_row.addStretch()
         layout.addLayout(opts_row)
 
@@ -204,13 +206,14 @@ class FlukaTab(QWidget):
         }
 
         print(f"\n[FlukaTab] Starting process for: {self.input_file}")
-        
+
         if params["beta_mode"]:
             from .workers import FlukaMultiIonWorker
+
             self.worker = FlukaMultiIonWorker(params)
         else:
             self.worker = FlukaWorker(params)
-            
+
         self.worker.progress.connect(self.progress_bar.setValue)
         self.worker.status_update.connect(self.status_text.setText)
         self.worker.result_ready.connect(self._on_done)

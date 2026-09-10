@@ -56,4 +56,4 @@ exclude = [".git", "__pycache__", "build", "dist", "docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = []
+ignore = ["E501", "F401", "F841"]

@@ -189,7 +189,7 @@ class _Tab6b(QWidget, _LUTLoaderMixin):
         self.skip_spin.setValue(1)
         self.skip_spin.setRange(0, 100)
         opts_row.addWidget(self.skip_spin)
-        
+
         opts_row.addWidget(QLabel("VB (µm/h):"))
         self.vb_spin = QDoubleSpinBox()
         self.vb_spin.setRange(0.01, 20.0)

@@ -353,7 +353,7 @@ class VTMultiIonModel:
             # Analytical model returns V directly; stay constant regardless of vb
             return v_raw
         else:
-            # User requested invariant V_T / V_B scaling. 
+            # User requested invariant V_T / V_B scaling.
             # We return the fitted ratio directly without rescaling it by (VB_nominal / vb)
             return v_raw
 

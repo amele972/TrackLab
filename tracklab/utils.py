@@ -71,13 +71,13 @@ def compute_etching_time(z_value, vb=None, z_ref=None, t_ref=None, cosz=1.0):
 
     # Determine surface Z based on particle direction (top or bottom)
     surface_z = z_ref if cosz >= 0 else abs(z_ref)
-    
+
     # Distance from surface in cm, converted to µm
     distance_um = abs(z_value - surface_z) * 10000.0
-    
+
     # Delay time to reach the particle depth
     delay_hours = distance_um / vb
-    
+
     return max(t_ref - delay_hours, 0.0)
 
 

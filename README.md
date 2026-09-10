@@ -37,7 +37,7 @@ This modern framework preserves the original physical foundations while extendin
 
 ## ⚙️ How it Works
 
-TrackLab computes the three-dimensional geometry of etched tracks by modelling the competition between the bulk detector etch rate ($V_B$) and the track etch rate ($V_T$). 
+TrackLab computes the three-dimensional geometry of etched tracks by modelling the competition between the bulk detector etch rate ($V_B$) and the track etch rate ($V_T$).
 
 The track etch rate depends on the particle's residual range $R'$, calculated using SRIM range-energy tables and empirical parametrizations of the reduced etch-rate ratio $V(R') = V_T(R') / V_B$. For protons, TrackLab uses the standard Nikezic and Yu double-exponential model. For light ions, a Broken Power Law (BPL) or other selected empirical functions are used.
 
@@ -100,9 +100,9 @@ from tracklab.calculate_track_parameter import calculate_track_parameters
 
 # Calculate track parameters for a 1.5 MeV proton at 75° incidence
 res = calculate_track_parameters(
-    energy_MeV_u=1.5, 
-    angle_deg=75.0, 
-    vb_um_h=4.7, 
+    energy_MeV_u=1.5,
+    angle_deg=75.0,
+    vb_um_h=4.7,
     time_etching_h=2.83,
     ion='protons'
 )
@@ -123,7 +123,7 @@ When TrackLab GUI opens for the first time, a Configuration Summary will appear 
 - **Alpha**   : Hermsdorf (2009) (Model 5) <- default
 - **Li, C, O**: Broken Power Law (BPL) — automatic
 
-If these match your experiment, click "Got it, Launch TrackLab!". 
+If these match your experiment, click "Got it, Launch TrackLab!".
 To change models at any time, go to the Configuration tab (Mode 7) in the app or use `Help -> Show Configuration Summary (F1)`.
 
 ---
@@ -156,7 +156,7 @@ If you use TrackLab, please consider citing the original models:
 
 * **TRACK_P (Proton Tracks)**: D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, SoftwareX, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
 * **TRACK_VISION (Optical Simulation)**: D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, Computer Physics Communications, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)
-* **V-Function Models**: 
+* **V-Function Models**:
   - D. Hermsdorf, *"Measurement and comparative evaluation of the sensitivity V for protons and hydrogen isotopes registration in PADC detectors of type CR-39"*, Radiation Measurements 44, 806–812, (2009).
   - D. Hermsdorf, *"Evaluation of the sensitivity function V for registration of $\alpha$-particles in PADC CR-39 solid state nuclear track detector material"*, Radiation Measurements 44, 283–288, (2009).
 
