@@ -20,45 +20,65 @@ When an ion of a given initial energy $E$ enters the detector, its projected ran
 Chemical etching removes the undamaged bulk detector material at a constant rate $v_B$ (bulk etch rate, $\mu\text{m/h}$). Along the particle path, radiation damage increases the local dissolution rate to $v_T$ (track etch rate, $\mu\text{m/h}$).
 
 The geometry of the etched track is governed by the reduced etch-rate ratio:
+
 $$V(y) = \frac{v_T(y)}{v_B} \ge 1$$
+
 where $y = R - x$ is the **residual range** (the remaining distance along the particle trajectory to its stopping point, where $x$ is the coordinate along the track axis).
 
 TrackLab implements distinct $V(y)$ parameterizations for different ion species:
 
 #### Proton Model (Nikezi&cacute; / Hermsdorf)
 For protons, the standard formulation is a double-exponential fit:
+
 $$V(y) = 1 + \left(a_1 e^{-a_2 y} + a_3 e^{-a_4 y}\right)\left(1 - e^{-a_5 y}\right)$$
+
 This satisfies the boundary condition $V(0) = 1$ (the track etch rate equals the bulk etch rate at the stopping point). The standard parameters are:
+
 $$a_1 = 0.4306, \quad a_2 = 0.00737, \quad a_3 = 1.0559, \quad a_4 = 0.1072, \quad a_5 = 1.412$$
 
 #### Light Ion Model
 For heavier ions (Lithium, Carbon, Oxygen), a Broken Power Law (BPL) model is used to fit the experimental data:
+
 $$V(y) = 1 + \frac{A \cdot y^{\alpha}}{1 + \left(\frac{y}{y_0}\right)^{\alpha+\beta}}$$
+
 where $A$, $y_0$, $\alpha$, and $\beta$ are parameters fitted to the digitized experimental data from Dörschel et al.
 
 #### Helium Ion (Alpha) Models
+
 For alpha particles, TrackLab supports 7 alternative parameterizations from the literature (e.g., Durrani & Bull, Brun et al., Yu et al., Hermsdorf, Green et al.). The default is Brun et al. (1999):
+
 $$V(y) = 1 + e^{-a_1 y + a_4} - e^{-a_2 y + a_3} + e^{a_3} - e^{a_4}$$
 
 ### C. Integrating Wavefront Propagation
+
 To find the position reached by the etchant along the track axis, we precompute a cumulative integration function $F(u)$ of the inverse etch-rate ratio:
+
 $$F(u) = \int_0^u \frac{1}{V(\xi)} d\xi$$
+
 The integral of the track etch rate along a segment $[u_a, u_b]$ is then efficiently computed by interpolation:
+
 $$\int_{u_a}^{u_b} \frac{1}{V(\xi)} d\xi = F(u_b) - F(u_a)$$
 
 For a track originating at depth $z_{\text{origin}}$ relative to the etched surface, the etchant must first remove the bulk material to reach the track origin. This introduces a delay before track etching begins:
+
 $$t_{\text{delay}} = \frac{z_{\text{origin}}}{v_B}$$
+
 The effective etching time available for track formation is therefore:
+
 $$t_{\text{eff}} = \max(0, t - t_{\text{delay}})$$
 
 The etched distance $d_{\text{etch}}$ along the track is found by solving:
+
 $$\int_0^{d_{\text{etch}}} \frac{1}{v_T(R-x)} dx = t_{\text{eff}}$$
 
 At any point $x \le d_{\text{etch}}$, the time $t(x)$ when the etchant first reached $x$ relative to the start of track etching is:
+
 $$t(x) = \int_0^x \frac{1}{v_T(R-\xi)} d\xi$$
 
 The remaining etching time available for lateral growth at that point is $t_{\text{over}} = t_{\text{eff}} - t(x)$. The radius of the resulting circular envelope at $x$ is:
+
 $$r_{\text{wall}}(x) = v_B \cdot t_{\text{over}} \cdot \cos(\delta)$$
+
 where $\delta = \arcsin(1/V(R-x))$ is the local critical angle.
 
 Tracks can originate from both the top and bottom surfaces of the detector. For tracks originating from the bottom surface (e.g., in a transmission configuration), the simulation effectively mirrors the geometry to model etching from the reverse side.
