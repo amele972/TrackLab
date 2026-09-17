@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
@@ -43,13 +43,14 @@ jobs:
           python -m sphinx -b html docs docs/_build/html
 
       - name: Disable Jekyll processing
-        run: |
-          python -c "import pathlib; pathlib.Path('docs/_build/html/.nojekyll').touch()"
+        run: touch docs/_build/html/.nojekyll
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
+        # Note: enablement: true is intentionally omitted — it requires
+        # admin-level token permissions and causes "Resource not accessible
+        # by integration". Pages source must be set once manually in
+        # Settings → Pages → Source → GitHub Actions.
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -58,7 +59,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
