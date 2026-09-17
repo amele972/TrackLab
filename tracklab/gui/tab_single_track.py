@@ -128,9 +128,11 @@ class SingleTrackTab(QWidget):
         self.calc_btn.setEnabled(True)
 
         if res.get("indicator", -1) != 1:
-            self.status.setText(f"❌ {res.get('status', 'Not developed')}")
+            status = res.get("status", "Not developed")
+            self.status.setText(f"❌ {status}")
             for v in self.result_labels.values():
                 v.setText("—")
+            self._show_not_developed_popup(status, res)
             return
 
         self.result_labels["depth"].setText(f"{res['depth_um']:.3f}")
@@ -145,6 +147,78 @@ class SingleTrackTab(QWidget):
         )
         self._plot_4panel(res)
         self.export_btn.setEnabled(True)
+
+    # Map status codes → (title, explanation)
+    _NOT_DEVELOPED_MESSAGES = {
+        "Angle < Critical": (
+            "Track Not Developed — Angle Below Critical",
+            "The incidence angle ({angle:.1f}°) is below the critical angle for "
+            "these conditions ({ion}, {energy:.3f} MeV, VB = {vb:.3f} µm/h).\n\n"
+            "The track etch rate is never high enough relative to the bulk etch "
+            "rate for a track to open at the surface.\n\n"
+            "💡 Try increasing the angle, reducing VB, or using a higher-energy particle.",
+        ),
+        "No Track Formed": (
+            "Track Not Developed — No Track Formed",
+            "Under these conditions ({ion}, {energy:.3f} MeV, {angle:.1f}°, "
+            "VB = {vb:.3f} µm/h, t = {time:.3f} h) the etch-rate profile never "
+            "reaches the threshold needed to open a track.\n\n"
+            "💡 Try increasing the etching time or reducing VB.",
+        ),
+        "Track below surface": (
+            "Track Not Developed — Track Below Surface",
+            "A track forms inside the detector but does not reach the etched "
+            "surface within the given etching time "
+            "({ion}, {energy:.3f} MeV, {angle:.1f}°, t = {time:.3f} h).\n\n"
+            "💡 Try increasing the etching time.",
+        ),
+        "Energy exceeds SRIM tables": (
+            "Energy Out of Range",
+            "The particle energy ({energy:.3f} MeV) exceeds the maximum covered "
+            "by the SRIM range-energy tables (~30 MeV/u).\n\n"
+            "The range cannot be reliably interpolated beyond this limit.\n\n"
+            "💡 Please use a lower particle energy.",
+        ),
+    }
+
+    def _show_not_developed_popup(self, status: str, res: dict):
+        """Show a QMessageBox explaining why the track did not develop."""
+        if getattr(self, "_suppress_not_developed_popup", False):
+            return
+
+        title, template = self._NOT_DEVELOPED_MESSAGES.get(
+            status,
+            (
+                "Track Not Developed",
+                "The track did not develop under these conditions.\nStatus: {status}",
+            ),
+        )
+
+        params = {
+            "ion": res.get("ion", self.param_panel.ion),
+            "energy": res.get("energy", self.param_panel.energy),
+            "angle": res.get("angle_deg", self.param_panel.angle),
+            "vb": self.param_panel.vb,
+            "time": self.param_panel.time,
+            "status": status,
+        }
+        message = template.format(**params)
+
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Warning)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(message)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+
+        dont_show_cb = msg_box.addButton(
+            "Don't show again for this session",
+            QMessageBox.ButtonRole.ResetRole,
+        )
+
+        msg_box.exec()
+
+        if msg_box.clickedButton() == dont_show_cb:
+            self._suppress_not_developed_popup = True
 
     def _on_error(self, msg):
         self.calc_btn.setEnabled(True)

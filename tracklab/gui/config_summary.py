@@ -87,6 +87,11 @@ class ConfigSummaryDialog(QDialog):
         self.setWindowFlags(
             self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint
         )
+        # Fix Linux (RHEL/Wayland/X11) ghost-rendering on move/resize:
+        # force the dialog to paint its own solid background rather than
+        # inheriting whatever the compositor exposes as "transparent".
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, True)
+        self.setAutoFillBackground(True)
         self._build_ui()
         self._apply_theme()
 
@@ -421,7 +426,10 @@ class ConfigSummaryDialog(QDialog):
                 background: transparent;
                 border: none;
             }}
-            QWidget {{
+            /* Only make scroll-area interior content transparent, NOT the dialog
+               root — the broad QWidget rule causes ghost artefacts on Linux. */
+            QScrollArea > QWidget,
+            QScrollArea > QWidget > QWidget {{
                 background: transparent;
             }}
             /* keep cards opaque */

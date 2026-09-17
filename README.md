@@ -18,19 +18,23 @@ It acts as a physical bridge between Monte Carlo particle transport simulations 
 
 ## ⚡ Quick Download — No Installation Required
 
-> **Just want to run the app?** Download the standalone Windows executable — no Python, no command line, no setup needed.
+> **Just want to run the app?** Download the standalone executable for your platform — no Python, no command line, no setup needed.
 
 <p align="center">
   <a href="https://github.com/amele972/TrackLab/releases/latest">
-    <img src="https://img.shields.io/badge/Download-TrackLab.exe-blue?style=for-the-badge&logo=windows" alt="Download TrackLab.exe">
+    <img src="https://img.shields.io/badge/Download-TrackLab.exe-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download TrackLab.exe (Windows)">
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/amele972/TrackLab/releases/latest">
+    <img src="https://img.shields.io/badge/Download-TrackLab--linux-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Download TrackLab-linux (Linux)">
   </a>
 </p>
 
 1. Go to the [**Releases page**](https://github.com/amele972/TrackLab/releases/latest)
-2. Download `TrackLab.exe` under **Assets**
-3. Double-click to launch the GUI — that's it! ✅
-
-> **Note:** Windows may show a SmartScreen warning on first launch since the app is not yet signed. Click "More info" → "Run anyway".
+2. Download **`TrackLab.exe`** (Windows) or **`TrackLab-linux`** (Linux) under **Assets**
+3. Launch the app:
+   - **Windows:** Double-click `TrackLab.exe` *(SmartScreen may warn on first launch — click "More info" → "Run anyway")*
+   - **Linux:** Run `chmod +x TrackLab-linux && ./TrackLab-linux` in a terminal
 
 ---
 

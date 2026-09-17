@@ -1,0 +1,93 @@
+name: Build & Upload Release Executables
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  # -- Windows .exe -------------------------------------------------------------
+  build-windows:
+    name: Build TrackLab.exe (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pyinstaller
+          pip install -e .
+
+      - name: Build Windows executable
+        run: >
+          pyinstaller
+          --name TrackLab
+          --windowed
+          --onefile
+          --noconfirm
+          --add-data "tracklab/data;tracklab/data"
+          --exclude-module PyQt5
+          --exclude-module PySide2
+          --exclude-module PySide6
+          run_gui.py
+
+      - name: Upload TrackLab.exe to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/TrackLab.exe
+
+  # -- Linux binary -------------------------------------------------------------
+  build-linux:
+    name: Build TrackLab-linux (Ubuntu)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies for PyQt6 on headless Linux
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libgl1-mesa-dev \
+            libglib2.0-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1 \
+            libxkbcommon-x11-0
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pyinstaller
+          pip install -e .
+
+      - name: Build Linux executable
+        run: >
+          pyinstaller
+          --name TrackLab-linux
+          --onefile
+          --noconfirm
+          --add-data "tracklab/data:tracklab/data"
+          --exclude-module PyQt5
+          --exclude-module PySide2
+          --exclude-module PySide6
+          run_gui.py
+
+      - name: Upload TrackLab-linux to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/TrackLab-linux
