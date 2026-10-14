@@ -63,6 +63,7 @@ def calculate_track_parameters(
     is_bottom_track: bool = False,
     debug: bool = False,
     plot: bool = False,
+    skip_mesh: bool = False,
     **kwargs,
 ):
     """
@@ -412,7 +413,7 @@ def calculate_track_parameters(
     black_part = total_surface = projected_surface = total_length_um = 0.0
     mean_brightness = 0.0
 
-    if len(x_prof) > 5:
+    if not skip_mesh and len(x_prof) > 5:
         N_z = 150
         N_alpha = 181
         Z_levels = np.linspace(0.0, -depth_um + 1e-4, N_z)

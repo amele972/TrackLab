@@ -162,3 +162,6 @@ Desktop.ini
 
 # PyInstaller standalone executable (distributed via GitHub Releases, not committed to git)
 TrackLab.exe
+
+# Binary LUT caches
+*.npz

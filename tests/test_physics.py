@@ -158,4 +158,6 @@ def test_triton_track_physics():
     assert res["status"] == "Developed"
     assert res["depth_um"] > 0.0
     assert res["major_axis_um"] > 0.0
-    assert res["major_axis_um"] == pytest.approx(res["minor_axis_um"], abs=1e-3)  # normal incidence is circular
+    assert res["major_axis_um"] == pytest.approx(
+        res["minor_axis_um"], abs=1e-3
+    )  # normal incidence is circular

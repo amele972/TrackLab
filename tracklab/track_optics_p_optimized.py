@@ -400,9 +400,7 @@ def track_optics_p_optimized(
     total_projected_tri = float(np.sum(projected_areas_tri))
 
     if bg_brightness > 1e-12:
-        contrast = np.clip(
-            (bg_brightness - brightness) / bg_brightness, 0.0, 1.0
-        )
+        contrast = np.clip((bg_brightness - brightness) / bg_brightness, 0.0, 1.0)
     else:
         contrast = np.ones_like(brightness)
     dark_mask = contrast > MIN_DETECTABLE_CONTRAST
@@ -453,4 +451,3 @@ def track_optics_p_optimized(
             )
 
     return black_part, total_surface, projected_surface, vertices, normals_r, brightness
-
