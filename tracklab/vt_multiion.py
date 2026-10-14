@@ -124,6 +124,7 @@ class VTMultiIonModel:
 
     VB_FIT = {
         "protons": VB_FIT_PROTONS,
+        "tritons": VB_FIT_PROTONS,
         "Li": VB_FIT_DATA,
         "C": VB_FIT_DATA,
         "O": VB_FIT_DATA,
@@ -349,7 +350,7 @@ class VTMultiIonModel:
         """
         v_raw = self._V_fit(y, ion, energy)
 
-        if ion == "protons" or ion == "alpha":
+        if ion in ("protons", "alpha", "tritons", "triton"):
             # Analytical model returns V directly; stay constant regardless of vb
             return v_raw
         else:
@@ -366,6 +367,11 @@ class VTMultiIonModel:
             from .vt_utils import alpha_vt_function
 
             return alpha_vt_function(y)
+
+        if ion in ("tritons", "triton"):
+            from .vt_utils import triton_vt_function
+
+            return triton_vt_function(y)
 
         if ion == "protons" or ion not in self.interpolators:
             from .vt_utils import vt_function
@@ -447,8 +453,9 @@ class VTMultiIonModel:
         return 0.01, 1000.0
 
     def available_ions(self):
-        """List of ions with fitted data (protons always included)."""
-        return ["protons"] + [i for i in self.ions_in_data if i != "protons"]
+        """List of ions with fitted/analytical models (protons, tritons, alpha always included)."""
+        base = ["protons", "tritons", "alpha"]
+        return base + [i for i in self.ions_in_data if i not in base]
 
     def fitting_summary(self):
         """Print a table of all fitted parameters."""

@@ -36,6 +36,23 @@ This satisfies the boundary condition $V(0) = 1$ (the track etch rate equals the
 
 $$a_1 = 0.4306, \quad a_2 = 0.00737, \quad a_3 = 1.0559, \quad a_4 = 0.1072, \quad a_5 = 1.412$$
 
+#### Triton ($^3\text{H}$) Model (Hermsdorf / Fromm)
+Tritons (such as those produced by the $^{6}\text{Li}(n, \alpha)^3\text{H}$ reaction at $E = 2.73\text{ MeV}$) have the same charge ($Z = 1$) as protons but three times the mass ($A = 3$). A $2.73\text{ MeV}$ triton travels at $v_t \approx v_p / \sqrt{3}$, depositing significantly higher LET ($\sim 32\text{ keV/\mu m}$ vs $\sim 13.5\text{ keV/\mu m}$) and etching rapidly near its Bragg peak ($V \approx 2.1$).
+
+TrackLab provides two dedicated models from literature:
+
+1. **Hermsdorf (2009) Eq. (12), Table 2 (Active / Default)**:
+   Derived from the physical analogy between the Bethe-Bloch stopping power and residual range in CR-39:
+   $$V(y) = 1 + \frac{a_1}{(y + a_2)^{b_1}} \cdot \ln(y + a_3) \cdot \left(1 - e^{-y / a_4}\right) + \frac{y}{a_5}$$
+   with parameters:
+   $$a_1 = 3.8, \quad a_2 = 1.0\,\mu\text{m}, \quad a_3 = 1.0\,\mu\text{m}, \quad a_4 = 1.8\,\mu\text{m}, \quad a_5 = 900.0\,\mu\text{m}, \quad b_1 = 1.0$$
+   Valid across $0 < y < 120\,\mu\text{m}$, fully encompassing the $68\,\mu\text{m}$ range of $2.73\text{ MeV}$ tritons.
+
+2. **Fromm (1990) Eq. (9), Table 1 (Alternative / Commented)**:
+   A Breit-Wigner empirical resonance formulation:
+   $$V(y) = 1 + 2 \cdot a_1 \cdot \frac{y \cdot (V^{\max} - 1)}{a_1^2 + y^2}$$
+   with $a_1 = 3.2\,\mu\text{m}$ and $V^{\max} = 2.25$.
+
 #### Light Ion Model
 For heavier ions (Lithium, Carbon, Oxygen), a Broken Power Law (BPL) model is used to fit the experimental data:
 

@@ -77,8 +77,16 @@ def run_mode_fluka_all_ion(
                 skipped += 1
                 continue
 
-            # 2. Map to supported ion
-            ion_name = z_to_ion.get(z_val_ion)
+            # 2. Map to supported ion (checking both Z and A)
+            if z_val_ion == 1 and a_val_ion == 3:
+                ion_name = "tritons"
+            elif z_val_ion == 1 and a_val_ion == 1:
+                ion_name = "protons"
+            elif z_val_ion == 2:
+                ion_name = "alpha"
+            else:
+                ion_name = z_to_ion.get(z_val_ion)
+
             if not ion_name or ion_name not in interps:
                 skipped += 1
                 continue

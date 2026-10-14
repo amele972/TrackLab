@@ -20,6 +20,14 @@ CONDENSER_NA = 0.25
 #   16 -> higher accuracy near the TIR transition zone
 N_CONE_RAYS = 32
 
+# Minimum detectable relative contrast for the TASL microscope camera.
+# Calibrated from experimental PADC images: faces whose contrast relative
+# to the flat-surface background falls below this value are indistinguishable
+# from the background and will not be detected as part of the track.
+# Value 0.052 corresponds to ~5.2% contrast, derived from Otsu thresholding
+# of TASL microscope images (background_mean=104.4, threshold=99.0).
+MIN_DETECTABLE_CONTRAST = 0.052
+
 
 # =============================================================================
 # FRESNEL TRANSMITTED INTENSITY  (includes obliquity factor — Fortran DEO)
@@ -259,7 +267,8 @@ def track_optics_p_optimized(
 
     Returns
     -------
-    black_part    : float    -- area-weighted fraction of dark faces (B < 0.01)
+    black_part    : float    -- area-weighted fraction of dark faces (relative
+                               contrast vs flat-surface background > MIN_DETECTABLE_CONTRAST)
     total_surface : float    -- total mesh surface area (um^2)
     vertices      : (F,3,3) -- triangle vertices for rendering
     normals       : (F,3)   -- unit face normals for rendering
@@ -353,12 +362,53 @@ def track_optics_p_optimized(
     brt_raw = np.concatenate([brightness_q, brightness_q])
     brightness = brt_raw[valid]
 
-    # 6. Statistics
+    # 6. Background brightness: Fresnel transmission through a FLAT plastic-air
+    #    interface, averaged over the same condenser cone.  This is the intensity
+    #    the camera sees where there is NO track — the reference for contrast.
+    n1 = N_AIR if is_bottom_track else N_PLASTIC
+    n2 = N_PLASTIC if is_bottom_track else N_AIR
+    flat_n = np.array([[0.0, 0.0, 1.0]])
+    bg_sum = 0.0
+    for ray in cone_rays:
+        r = np.array([ray])
+        ci = np.abs(np.einsum("ij,ij->i", r, flat_n))
+        si2 = np.maximum(0.0, 1.0 - ci**2)
+        tir_bg = (n1 / n2) ** 2 * si2 >= 1.0
+        na_bg = n1 * np.sqrt(si2) > MICROSCOPE_NA
+        if not tir_bg[0] and not na_bg[0]:
+            bg_sum += float(fresnel_transmittance(n1, n2, ci, si2)[0])
+    bg_brightness = bg_sum / n_rays
+
+    # 7. Statistics using RELATIVE CONTRAST against background
+    #    contrast = (bg_brightness - face_brightness) / bg_brightness
+    #    A face is "dark" only if its contrast exceeds MIN_DETECTABLE_CONTRAST.
+    #    This correctly handles shallow over-etched pits whose absolute Fresnel
+    #    transmission is high (~0.95) but nearly identical to the background
+    #    (~0.96), making them optically invisible despite their large geometry.
+    #
+    #    IMPORTANT: black_part is computed using PROJECTED areas (onto the XY
+    #    plane), not total 3-D surface areas.  The microscope views the track
+    #    from above (along Z), so what matters is how much of the *image* is
+    #    dark, not how much of the 3-D surface is dark.  Steep wall faces near
+    #    the conical tip have large 3-D area but project to almost nothing in
+    #    the image.  The flat, shallow bottom projects at nearly 1:1.
     total_surface = float(np.sum(areas_tri))
-    dark_mask = brightness < 0.01
+
+    # Projected area of each triangle = 3D_area * |n_z|
+    # (n_z = z-component of the unit normal; horizontal face: |n_z|=1, vertical: |n_z|=0)
+    projected_areas_tri = areas_tri * np.abs(normals_r[:, 2])
+    total_projected_tri = float(np.sum(projected_areas_tri))
+
+    if bg_brightness > 1e-12:
+        contrast = np.clip(
+            (bg_brightness - brightness) / bg_brightness, 0.0, 1.0
+        )
+    else:
+        contrast = np.ones_like(brightness)
+    dark_mask = contrast > MIN_DETECTABLE_CONTRAST
     black_part = (
-        float(np.sum(areas_tri[dark_mask])) / total_surface
-        if total_surface > 0
+        float(np.sum(projected_areas_tri[dark_mask])) / total_projected_tri
+        if total_projected_tri > 0
         else 0.0
     )
 
@@ -373,15 +423,34 @@ def track_optics_p_optimized(
         )
         print(
             f"[track_optics] crit_angle={crit_deg:.2f} deg"
-            f"  surface={total_surface:.2f} um^2  black_part={black_part:.4f}"
+            f"  bg_brightness={bg_brightness:.4f}"
         )
-        print(f"[track_optics] projected_surface={projected_surface:.2f} um^2")
+        print(
+            f"[track_optics] surface_3D={total_surface:.2f} um^2"
+            f"  surface_projected={total_projected_tri:.2f} um^2"
+        )
+        print(
+            f"[track_optics] black_part={black_part:.4f}"
+            f"  min_contrast_threshold={MIN_DETECTABLE_CONTRAST:.3f}"
+        )
+        print(f"[track_optics] projected_surface_quad={projected_surface:.2f} um^2")
 
+        dark_faces = contrast[dark_mask]
+        if len(dark_faces):
+            dark_proj = float(np.sum(projected_areas_tri[dark_mask]))
+            print(
+                f"[track_optics] dark faces: count={len(dark_faces)}"
+                f"  mean_contrast={dark_faces.mean():.3f}"
+                f"  projected_area={dark_proj:.2f} um^2"
+            )
         bright = brightness[~dark_mask]
         if len(bright):
+            bright_proj = float(np.sum(projected_areas_tri[~dark_mask]))
             print(
-                f"[track_optics] bright faces: mean={bright.mean():.3f}"
-                f"  min={bright.min():.3f}  max={bright.max():.3f}"
+                f"[track_optics] bright faces: count={len(bright)}"
+                f"  mean_brightness={bright.mean():.3f}"
+                f"  projected_area={bright_proj:.2f} um^2"
             )
 
     return black_part, total_surface, projected_surface, vertices, normals_r, brightness
+

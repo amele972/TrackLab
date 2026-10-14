@@ -19,6 +19,7 @@ import sys
 # VB is the etching rate in the bulk (undamaged) detector material.
 VB_BY_ION = {
     "protons": 4.7,  # Proton: ~4.7 µm/h in CR-39
+    "tritons": 4.7,  # Triton (H-3): ~4.7 µm/h in CR-39
     "C": 4.7,  # Carbon
     "O": 4.7,  # Oxygen
     "Li": 4.7,  # Lithium
@@ -133,8 +134,34 @@ ALPHA_MODELS_INFO = {
     },
 }
 
+# ============================================================================
+# TRITON VT MODELS
+# ============================================================================
+
+# Selection for the V(y) model to be used for Tritons (Default = 1)
+# Available models:
+# 1: Hermsdorf (2009) Eq. (12), Table 2 (Active/Default - based on stopping power analogy)
+# 2: Fromm (1990) Eq. (9), Table 1 (Alternative/Breit-Wigner formulation - kept commented/selectable)
+TRITON_VT_MODEL = 1  # Hermsdorf (2009) Eq. (12)
+
+# Detailed configuration for Triton VT models
+TRITON_MODELS_INFO = {
+    1: {
+        "name": "Hermsdorf (2009) Eq. (12) - Table 2 (Active/Default)",
+        "formula": "1 + (a1/(y+a2)^b1) * ln(y+a3) * (1 - exp(-y/a4)) + y/a5",
+        "p": {"a1": 3.8, "a2": 1.0, "a3": 1.0, "a4": 1.8, "a5": 900.0, "b1": 1.0},
+        "reference": "D. Hermsdorf, Radiat. Meas. 44 (2009) 806-812, Eq. (12), Table 2",
+    },
+    2: {
+        "name": "Fromm (1990) Eq. (9) - Table 1 (Alternative)",
+        "formula": "1 + 2 * a1 * y * (Vmax - 1) / (a1^2 + y^2)",
+        "p": {"a1": 3.2, "Vmax": 2.25},
+        "reference": "M. Fromm (1990) / D. Hermsdorf, Radiat. Meas. 44 (2009) 806-812, Eq. (9), Table 1",
+    },
+}
+
 # List of all supported ions (for GUI dropdowns, etc.)
-SUPPORTED_IONS = ["protons", "Li", "C", "O", "alpha"]
+SUPPORTED_IONS = ["protons", "tritons", "alpha", "Li", "C", "O"]
 
 # Reference etching time (hours)
 TIME_ETCHING = 2.83
@@ -273,6 +300,8 @@ N_WORKERS = None  # None = single-threaded
 
 def get_vb_for_ion(ion):
     """Get bulk etch rate (VB) for a specific ion."""
+    if ion in ("triton", "tritons"):
+        ion = "tritons"
     return VB_BY_ION.get(ion, VB)
 
 

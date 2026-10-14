@@ -10,7 +10,7 @@
 [![Tests](https://img.shields.io/badge/tests-pytest-brightgreen.svg)](tests/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22813048.svg)](https://doi.org/10.5281/zenodo.22813048)
 
-**TrackLab** is a Python package that simulates the formation of tracks during chemical etching from latent trails left by charged particles (protons, alpha particles, lithium, carbon, oxygen) in CR-39 plastic detectors, and models their optical appearance under a transmission microscope.
+**TrackLab** is a Python package that simulates the formation of tracks during chemical etching from latent trails left by charged particles (protons, tritons, alpha particles, lithium, carbon, oxygen) in CR-39 plastic detectors, and models their optical appearance under a transmission microscope.
 
 It acts as a physical bridge between Monte Carlo particle transport simulations (e.g. FLUKA, GEANT4) and physical detector observations.
 
@@ -50,7 +50,7 @@ This modern framework preserves the original physical foundations while extendin
 
 ## ✨ Features
 
-- 🔬 **Unified Multi-Ion Physics**: Run calculations for Protons, Alphas, Lithium, Carbon, and Oxygen in a single tool.
+- 🔬 **Unified Multi-Ion Physics**: Run calculations for Protons, Tritons ($^3\text{H}$), Alphas, Lithium, Carbon, and Oxygen in a single tool.
 - 🎲 **Monte Carlo Integration**: Import phase-space outputs directly from codes like FLUKA and convert them into simulated track profiles.
 - 📸 **Realistic Optical Appearance**: Full 3D ray-tracing engine that simulates light propagation, reflection, and refraction to render true-to-life transmission microscope images.
 - 🖥️ **Interactive Dashboard**: Feature-rich PyQt6 graphical interface for seamless analysis and visualization.
@@ -180,8 +180,10 @@ If you use TrackLab, please consider citing the original models:
 * **TRACK_P (Proton Tracks)**: D. Nikezic and K. N. Yu, *"A computer program TRACK_p for studying proton tracks in PADC detectors"*, SoftwareX, 5, 74–79, (2016). [DOI: 10.1016/j.softx.2016.04.006](https://doi.org/10.1016/j.softx.2016.04.006)
 * **TRACK_VISION (Optical Simulation)**: D. Nikezic and K. N. Yu, *"Computer program TRACK_vision for simulating optical appearance of etched tracks in CR-39 nuclear track detectors"*, Computer Physics Communications, 178(8), 591–595, (2008). [DOI: 10.1016/j.cpc.2007.11.011](https://doi.org/10.1016/j.cpc.2007.11.011)
 * **V-Function Models**:
-  - D. Hermsdorf, *"Measurement and comparative evaluation of the sensitivity V for protons and hydrogen isotopes registration in PADC detectors of type CR-39"*, Radiation Measurements 44, 806–812, (2009).
-  - D. Hermsdorf, *"Evaluation of the sensitivity function V for registration of $\alpha$-particles in PADC CR-39 solid state nuclear track detector material"*, Radiation Measurements 44, 283–288, (2009).
+  - D. Hermsdorf, *"Measurement and comparative evaluation of the sensitivity V for protons and hydrogen isotopes registration in PADC detectors of type CR-39"*, Radiation Measurements 44, 806–812, (2009). [DOI: 10.1016/j.radmeas.2009.10.088](https://doi.org/10.1016/j.radmeas.2009.10.088)
+  - D. Hermsdorf, *"Evaluation of the sensitivity function V for registration of $\alpha$-particles in PADC CR-39 solid state nuclear track detector material"*, Radiation Measurements 44, 283–288, (2009). [DOI: 10.1016/j.radmeas.2009.03.011](https://doi.org/10.1016/j.radmeas.2009.03.011)
+  - M. Fromm, *"Contribution à l'étude de la dosimétrie neutronique par détecteurs solides de traces nucléaires"*, Thèse de doctorat, Université de Franche-Comté, (1990).
+  - T. Yamauchi, H. Matsumoto, K. Oda, *"Triton, deuteron and proton responses of the CR-39 track detector"*, Proc. 10th Workshop on Radiation Detectors and their Use, KEK Proc. 96-4, pp. 41–49, (1996).
 
 ---
 

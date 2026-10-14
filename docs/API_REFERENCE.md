@@ -10,6 +10,7 @@ Central configuration file. All constants, paths, and mode parameters.
 |--------|------|-------------|
 | `VB_BY_ION` | `dict` | Bulk etch rates per ion (µm/h) |
 | `ALPHA_VT_MODEL` | `int` | Selection (1-7) for alpha particle V(y) model |
+| `TRITON_VT_MODEL` | `int` | Selection (1-2) for triton V(y) model (1: Hermsdorf, 2: Fromm) |
 | `OPTICS_MODEL` | `str` | `"optimized"` or `"full_trace"` |
 | `SRIM_FILENAME` | `str` | Path to unified SRIM data file |
 | `VY_DATA_FILENAME` | `str` | Path to experimental V(y) Excel data |
@@ -18,10 +19,11 @@ Central configuration file. All constants, paths, and mode parameters.
 
 ### `tracklab.vt_utils`
 
-Proton V(y) model (Nikezic/Dorschel) and integral helpers.
+Proton, triton, and alpha V(y) models and integral helpers.
 
 **Functions:**
 - `vt_function(y) → float|array` — V(y) for protons (dimensionless ratio)
+- `triton_vt_function(y, model_index=None) → float|array` — V(y) for tritons (Hermsdorf 2009 Eq. 12 / Fromm 1990 Eq. 9)
 - `alpha_vt_function(y, model_index=None) → float|array` — Multi-model alpha support
 - `build_vrint_interpolator(...) → PchipInterpolator` — Build cumulative ∫ 1/V(u) du
 - `fast_dint3(R, el, d, F_interp) → float` — Evaluate integral on segment [el, d]
@@ -30,16 +32,16 @@ Proton V(y) model (Nikezic/Dorschel) and integral helpers.
 
 ### `tracklab.vt_multiion`
 
-Multi-ion V(y) model dispatcher using Broken Power Law (BPL) fits.
+Multi-ion V(y) model dispatcher using Broken Power Law (BPL) fits and analytical models.
 
 **Functions:**
-- `V(y, ion, energy, vb=None) → float` — Primary dispatcher for all ions
+- `V(y, ion, energy, vb=None) → float` — Primary dispatcher for all ions (protons, tritons, alpha, Li, C, O)
 - `get_model() → VTMultiIonModel` — Get/create the multi-ion fitting engine
 
 **Class `VTMultiIonModel`:**
 - `.V(y, ion, energy, vb=None)` — Returns dimensionless VT/VB ratio
 - `.get_parameters(ion, energy)` — Get BPL {A, y0, alpha, beta}
-- `.available_ions()` — List found in `Data_ions.xlsx`
+- `.available_ions()` — List of supported/fitted ions
 
 ---
 
@@ -56,7 +58,7 @@ calculate_track_parameters(
     time_etching: float,    # h
     range_interpolator,     # SRIM interp
     F_interp,               # Integral interp
-    ion: str = None,        # 'protons', 'alpha', 'Li', 'C', 'O'
+    ion: str = None,        # 'protons', 'tritons', 'alpha', 'Li', 'C', 'O'
     vt_model = None,        # VTMultiIonModel
     origin_z: float = 0.0,  # Depth origin (µm) for delayed etching
     from_bottom: bool = False, # Whether track originates from the bottom surface

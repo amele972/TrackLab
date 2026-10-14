@@ -50,7 +50,7 @@ def load_srim_data(filename=None, target_max_mev=6000.0):
             )
 
     # Supported ions
-    supported_ions = {"protons", "Li", "C", "O", "alpha"}
+    supported_ions = {"protons", "tritons", "Li", "C", "O", "alpha"}
     ion_data = {ion: {"enes": [], "rans": []} for ion in supported_ions}
 
     if not os.path.exists(filename):
@@ -91,7 +91,7 @@ def load_srim_data(filename=None, target_max_mev=6000.0):
     interpolators = {}
     data_dict = {}
 
-    for ion in ["protons", "Li", "C", "O", "alpha"]:
+    for ion in ["protons", "tritons", "Li", "C", "O", "alpha"]:
         enes_list = ion_data[ion]["enes"]
         rans_list = ion_data[ion]["rans"]
 
@@ -140,6 +140,21 @@ def load_srim_data(filename=None, target_max_mev=6000.0):
             f"{rans[0]:.3f}–{rans[-1]:.3f} µm"
         )
 
+    # Physical isotope derivation for tritons (3H) if not explicitly present in the data file:
+    # At identical velocity (same E/A), range scales with mass: R_t(E) = 3 * R_p(E / 3)
+    if "tritons" not in interpolators and "protons" in interpolators:
+        p_enes, p_rans = data_dict["protons"]
+        t_enes = p_enes * 3.0
+        t_rans = p_rans * 3.0
+        interp_t = PchipInterpolator(t_enes, t_rans, extrapolate=False)
+        interpolators["tritons"] = interp_t
+        data_dict["tritons"] = (t_enes, t_rans)
+        print(
+            f"  [OK] {'tritons':8s}: {len(t_enes):3d} points (derived from protons via isotope scaling), "
+            f"{t_enes[0]:.3f}–{t_enes[-1]:.3f} MeV, "
+            f"{t_rans[0]:.3f}–{t_rans[-1]:.3f} µm"
+        )
+
     return interpolators, data_dict
 
 
@@ -166,6 +181,8 @@ def interpolate_range(energy, ion_or_interpolator, interpolators=None):
     """
     if isinstance(ion_or_interpolator, str):
         ion = ion_or_interpolator
+        if ion == "triton":
+            ion = "tritons"
         if interpolators is None:
             raise ValueError("interpolators dict required when passing ion name")
         if ion not in interpolators:

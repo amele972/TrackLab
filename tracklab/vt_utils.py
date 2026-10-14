@@ -198,6 +198,89 @@ def alpha_vt_function(y, model_index=None):
 
 
 # ============================================================================
+# Triton-specific VT models (Hermsdorf Eq. 12 & Fromm Eq. 9)
+# ============================================================================
+
+
+def triton_vt_function(y, model_index=None):
+    """
+    Compute V(y) = VT(y) / VB for Tritons (3H) in CR-39 / PADC.
+
+    References:
+    -----------
+    - Model 1 (Active/Default):
+      D. Hermsdorf, "Measurement and comparative evaluation of the sensitivity V
+      for protons and hydrogen isotopes registration in PADC detectors of type CR-39",
+      Radiation Measurements 44 (2009) 806-812, Eq. (12), Table 2 (extrapolated).
+      Valid for 0 < R' < 120 µm. Based on Bethe-Bloch stopping power analogy.
+
+    - Model 2 (Alternative - Fromm 1990 Eq. 9, Table 1):
+      M. Fromm (1990) / D. Hermsdorf (2009) Eq. (9), Table 1 (extrapolated).
+      Breit-Wigner empirical resonance formulation.
+    """
+    from .config import TRITON_MODELS_INFO, TRITON_VT_MODEL
+
+    if model_index is None:
+        model_index = TRITON_VT_MODEL
+
+    y = np.asarray(y, dtype=float)
+    y_safe = np.maximum(y, 1e-9)
+
+    # -------------------------------------------------------------------------
+    # EQUATION OF FROMM (1990) Eq. (9) / Table 1 (kept commented as requested):
+    # -------------------------------------------------------------------------
+    # a1_fromm = 3.2      # µm (peak position)
+    # v_max_fromm = 2.25  # maximum sensitivity
+    # v_fromm = 1.0 + 2.0 * a1_fromm * y_safe * (v_max_fromm - 1.0) / (a1_fromm**2 + y_safe**2)
+    # -------------------------------------------------------------------------
+
+    if model_index == 1:
+        # Hermsdorf (2009) Eq. (12) - Table 2 (Extrapolated for Tritons)
+        # V_fit = 1 + [a1 / (R' + a2)^b1] * ln(R' + a3) * (1 - exp(-R' / a4)) + R' / a5
+        a1 = 3.8
+        a2 = 1.0  # µm
+        a3 = 1.0  # µm
+        a4 = 1.8  # µm
+        a5 = 900.0  # µm
+        b1 = 1.0
+
+        term2 = (
+            a1
+            / ((y_safe + a2) ** b1)
+            * np.log(y_safe + a3)
+            * (1.0 - np.exp(-y_safe / a4))
+        )
+        term3 = y_safe / a5
+        v = 1.0 + term2 + term3
+
+    elif model_index == 2:
+        # Fromm (1990) Eq. (9) - Table 1 (Extrapolated for Tritons)
+        # V_emp = 1 + 2 * a1 * R' * (Vmax - 1) / (a1^2 + R'^2)
+        a1 = 3.2
+        v_max = 2.25
+        v = 1.0 + 2.0 * a1 * y_safe * (v_max - 1.0) / (a1**2 + y_safe**2)
+
+    else:
+        # Default fallback to Hermsdorf (2009) Eq. (12)
+        a1 = 3.8
+        a2 = 1.0
+        a3 = 1.0
+        a4 = 1.8
+        a5 = 900.0
+        b1 = 1.0
+        term2 = (
+            a1
+            / ((y_safe + a2) ** b1)
+            * np.log(y_safe + a3)
+            * (1.0 - np.exp(-y_safe / a4))
+        )
+        term3 = y_safe / a5
+        v = 1.0 + term2 + term3
+
+    return np.maximum(v, 1.0)
+
+
+# ============================================================================
 # VT integral interpolator cache
 # ============================================================================
 
@@ -238,6 +321,9 @@ def build_vrint_interpolator(
             # Estimation for protons: Range(um) approx 18 * E^1.78
             # We take a safe margin.
             R_max = float(20.0 * (energy**1.8) + 50.0)
+        elif ion in ("tritons", "triton"):
+            # Estimation for tritons: Range(um) approx 3 * Range_proton(E/3)
+            R_max = float(60.0 * ((energy / 3.0) ** 1.8) + 50.0)
         elif ion == "alpha":
             # Estimation for alphas: Range(um) approx 1.6 * E^1.5
             R_max = float(5.0 * (energy**2.0) + 50.0)
@@ -247,11 +333,12 @@ def build_vrint_interpolator(
     # Default routing logic when no vt_model is provided (legacy or convenient path)
     if vt_model is None:
         from . import vt_multiion as vtm
-        from .config import ALPHA_VT_MODEL
+        from .config import ALPHA_VT_MODEL, TRITON_VT_MODEL
 
-        # Build cache key including ion and alpha model index if applicable
+        # Build cache key including ion, alpha model index, and triton model index if applicable
         alpha_idx = ALPHA_VT_MODEL if ion == "alpha" else 0
-        cache_key = (ion, alpha_idx, vb, R_max, N)
+        triton_idx = TRITON_VT_MODEL if ion in ("tritons", "triton") else 0
+        cache_key = (ion, alpha_idx, triton_idx, vb, R_max, N)
 
         if cache_key in _VRINT_CACHE:
             return _VRINT_CACHE[cache_key]
