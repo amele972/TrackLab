@@ -37,7 +37,7 @@ from .vt_utils import build_vrint_interpolator
 
 # Mapping from nuclear charge Z (and mass A) to TrackLab ion name
 Z_TO_ION = {
-    1: "protons",   # default for Z=1; A=3 overridden to 'tritons'
+    1: "protons",  # default for Z=1; A=3 overridden to 'tritons'
     2: "alpha",
     3: "Li",
     6: "C",
@@ -46,10 +46,10 @@ Z_TO_ION = {
 
 # Standard FLUKA particle IDs (where applicable)
 FLUKA_PID_TO_ION = {
-    1: "protons",   # PROTON
-    -3: "alpha",    # 4-HELIUM (in some scoring setups)
+    1: "protons",  # PROTON
+    -3: "alpha",  # 4-HELIUM (in some scoring setups)
     -4: "tritons",  # 3-H (in some scoring setups)
-    -6: "alpha",    # 4-He
+    -6: "alpha",  # 4-He
 }
 
 
@@ -85,7 +85,9 @@ def detect_fluka_format(lines: List[str]) -> Tuple[str, int]:
 
         lower = line_str.lower()
         # Check if line is a text header
-        if any(h in lower for h in ["particle", "energy", "ncase", "part_name", "ekin"]):
+        if any(
+            h in lower for h in ["particle", "energy", "ncase", "part_name", "ekin"]
+        ):
             header_count = i + 1
             continue
 
@@ -215,7 +217,9 @@ def process_fluka_file(
 
     fmt, auto_skip = detect_fluka_format(lines)
     header_rows = skip_header if skip_header is not None else auto_skip
-    data_lines = [line_item for line_item in lines[header_rows:] if not line_item.startswith("#")]
+    data_lines = [
+        line_item for line_item in lines[header_rows:] if not line_item.startswith("#")
+    ]
     total = len(data_lines)
 
     if progress_callback:
@@ -272,7 +276,10 @@ def process_fluka_file(
                     continue
 
                 ion_name = map_particle_species(
-                    z_val=z_val, a_val=a_val, part_name=part_name, default_ion=default_ion
+                    z_val=z_val,
+                    a_val=a_val,
+                    part_name=part_name,
+                    default_ion=default_ion,
                 )
                 energy_mev = ekin_gev * 1000.0
 
@@ -373,7 +380,9 @@ def process_fluka_file(
                     "ncase": ncase,
                     "ion": ion_name,
                     "energy_MeV": energy_mev,
-                    "beam_energy_MeV": beam_energy_mev if beam_energy_mev is not None else energy_mev,
+                    "beam_energy_MeV": beam_energy_mev
+                    if beam_energy_mev is not None
+                    else energy_mev,
                     "angle_deg": angle_deg,
                     "z_cm": z_pos,
                     "cosz": cosz_clipped,
@@ -405,7 +414,10 @@ def process_fluka_file(
             writer.writerows(results)
 
     if progress_callback:
-        progress_callback(100, f"Completed: {processed} processed ({developed} developed, {skipped} skipped).")
+        progress_callback(
+            100,
+            f"Completed: {processed} processed ({developed} developed, {skipped} skipped).",
+        )
 
     return {
         "results": results,

@@ -270,7 +270,9 @@ def run_mode4_fluka(
         default_ion=ion,
         skip_header=skip_header,
         output_csv=output_csv,
-        progress_callback=lambda pct, msg: print(f"  [{pct:3d}%] {msg}") if pct % 25 == 0 or pct == 100 else None,
+        progress_callback=lambda pct, msg: print(f"  [{pct:3d}%] {msg}")
+        if pct % 25 == 0 or pct == 100
+        else None,
     )
 
     results = res_dict["results"]
@@ -280,7 +282,9 @@ def run_mode4_fluka(
     print(f"\n  Processed: {len(results)}  Developed: {developed}  Skipped: {skipped}")
     for species, count_data in res_dict.get("ion_counts", {}).items():
         if count_data["total"] > 0:
-            print(f"    - {species:8s}: {count_data['total']:6d} simulated, {count_data['developed']:6d} developed")
+            print(
+                f"    - {species:8s}: {count_data['total']:6d} simulated, {count_data['developed']:6d} developed"
+            )
     if results:
         print(f"  Saved to: {output_csv}")
     return results

@@ -31,7 +31,9 @@ def run_mode_fluka_all_ion(
         vb=vb,
         skip_header=skip_header,
         output_csv=output_csv,
-        progress_callback=lambda pct, msg: print(f"  [{pct:3d}%] {msg}") if pct % 20 == 0 or pct == 100 else None,
+        progress_callback=lambda pct, msg: print(f"  [{pct:3d}%] {msg}")
+        if pct % 20 == 0 or pct == 100
+        else None,
     )
 
     print(
@@ -41,7 +43,9 @@ def run_mode_fluka_all_ion(
     print("  Species breakdown:")
     for ion, cnt in res_dict.get("ion_counts", {}).items():
         if cnt["total"] > 0:
-            print(f"    - {ion:8s}: {cnt['total']:6d} simulated, {cnt['developed']:6d} developed")
+            print(
+                f"    - {ion:8s}: {cnt['total']:6d} simulated, {cnt['developed']:6d} developed"
+            )
     print(f"  Results saved to: {output_csv}")
     return res_dict["results"]
 

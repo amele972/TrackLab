@@ -23,7 +23,9 @@ def test_beam_energy_filename_parsing():
     """Verify nominal beam energy extraction from filenames."""
     assert parse_beam_energy_from_filename("protons_1.5MeV.txt") == pytest.approx(1.5)
     assert parse_beam_energy_from_filename("AmBe_2,5MeV_test.dat") == pytest.approx(2.5)
-    assert parse_beam_energy_from_filename("neutrons_14.8MeV.txt") == pytest.approx(14.8)
+    assert parse_beam_energy_from_filename("neutrons_14.8MeV.txt") == pytest.approx(
+        14.8
+    )
     assert parse_beam_energy_from_filename("sample.txt") is None
 
 
@@ -104,7 +106,7 @@ NCASE EVENT_TYPE PART_NAME Z A EKIN_GEV Z_POS CZ_DIR COMMENT
 
         assert res["total"] == 5
         assert res["processed"] == 4  # 4 entrance tracks processed, 1 stopping skipped
-        assert res["skipped"] == 1    # stopping track skipped
+        assert res["skipped"] == 1  # stopping track skipped
         assert res["format"] == "mgdraw_extended"
 
         # Check ion breakdown

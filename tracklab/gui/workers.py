@@ -251,4 +251,5 @@ class GenericWorker(QThread):
 
 class FlukaMultiIonWorker(FlukaWorker):
     """Backward-compatible alias for FlukaWorker (now unified for all ions)."""
+
     pass

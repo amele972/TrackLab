@@ -80,7 +80,9 @@ class FlukaTab(QWidget):
         opts_row.addWidget(self.skip_header)
 
         opts_row.addSpacing(20)
-        self.auto_ion_label = QLabel("Auto-detects particle species (protons, tritons, alpha, Li, C, O)")
+        self.auto_ion_label = QLabel(
+            "Auto-detects particle species (protons, tritons, alpha, Li, C, O)"
+        )
         self.auto_ion_label.setStyleSheet("color: #a6e3a1; font-size: 11px;")
         opts_row.addWidget(self.auto_ion_label)
 
@@ -120,7 +122,15 @@ class FlukaTab(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels(
-            ["Ion", "E (MeV)", "Angle (°)", "Depth (µm)", "Major (µm)", "Minor (µm)", "Status"]
+            [
+                "Ion",
+                "E (MeV)",
+                "Angle (°)",
+                "Depth (µm)",
+                "Major (µm)",
+                "Minor (µm)",
+                "Status",
+            ]
         )
         self.table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
@@ -147,7 +157,10 @@ class FlukaTab(QWidget):
 
     def _browse(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Select FLUKA File", "", "Text Files (*.txt);;Data Files (*.dat);;All (*)"
+            self,
+            "Select FLUKA File",
+            "",
+            "Text Files (*.txt);;Data Files (*.dat);;All (*)",
         )
         if path:
             # Reset state for the new file
@@ -227,7 +240,11 @@ class FlukaTab(QWidget):
 
         # Species summary text
         ion_counts = data.get("ion_counts", {})
-        active_counts = [f"{k}: {v['developed']}/{v['total']}" for k, v in ion_counts.items() if v["total"] > 0]
+        active_counts = [
+            f"{k}: {v['developed']}/{v['total']}"
+            for k, v in ion_counts.items()
+            if v["total"] > 0
+        ]
         if active_counts:
             self.status_text.setText(f"Completed: {', '.join(active_counts)} developed")
 

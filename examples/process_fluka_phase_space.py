@@ -35,7 +35,9 @@ def main():
         file_path=fluka_file,
         time_etching=2.83,
         output_csv=output_csv,
-        progress_callback=lambda pct, msg: print(f"  [{pct:3d}%] {msg}") if pct % 25 == 0 or pct == 100 else None,
+        progress_callback=lambda pct, msg: print(f"  [{pct:3d}%] {msg}")
+        if pct % 25 == 0 or pct == 100
+        else None,
     )
 
     print("\n--- Simulation Summary ---")
@@ -49,12 +51,16 @@ def main():
     for ion, stats in res.get("ion_counts", {}).items():
         if stats["total"] > 0:
             dev_pct = 100.0 * stats["developed"] / stats["total"]
-            print(f"  {ion:8s}: {stats['total']:6d} incident | {stats['developed']:6d} developed ({dev_pct:.1f}%)")
+            print(
+                f"  {ion:8s}: {stats['total']:6d} incident | {stats['developed']:6d} developed ({dev_pct:.1f}%)"
+            )
 
     # Display preview of first 5 tracks
     if res["results"]:
         print("\n--- First 5 Track Dimensions ---")
-        print(f"{'Ion':<8} {'Energy (MeV)':>12} {'Angle (deg)':>12} {'Depth (um)':>12} {'Major (um)':>12} {'Status':<12}")
+        print(
+            f"{'Ion':<8} {'Energy (MeV)':>12} {'Angle (deg)':>12} {'Depth (um)':>12} {'Major (um)':>12} {'Status':<12}"
+        )
         print("-" * 72)
         for r in res["results"][:5]:
             print(
