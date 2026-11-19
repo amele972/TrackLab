@@ -27,7 +27,7 @@ where $y = R - x$ is the **residual range** (the remaining distance along the pa
 
 TrackLab implements distinct $V(y)$ parameterizations for different ion species:
 
-#### Proton Model (Nikezi&cacute; / Hermsdorf)
+#### Proton Model (Nikezić / Hermsdorf)
 For protons, the standard formulation is a double-exponential fit:
 
 $$V(y) = 1 + \left(a_1 e^{-a_2 y} + a_3 e^{-a_4 y}\right)\left(1 - e^{-a_5 y}\right)$$
@@ -37,7 +37,7 @@ This satisfies the boundary condition $V(0) = 1$ (the track etch rate equals the
 $$a_1 = 0.4306, \quad a_2 = 0.00737, \quad a_3 = 1.0559, \quad a_4 = 0.1072, \quad a_5 = 1.412$$
 
 #### Triton ($^3\text{H}$) Model (Hermsdorf / Fromm)
-Tritons (such as those produced by the $^{6}\text{Li}(n, \alpha)^3\text{H}$ reaction at $E = 2.73\text{ MeV}$) have the same charge ($Z = 1$) as protons but three times the mass ($A = 3$). A $2.73\text{ MeV}$ triton travels at $v_t \approx v_p / \sqrt{3}$, depositing significantly higher LET ($\sim 32\text{ keV/\mu m}$ vs $\sim 13.5\text{ keV/\mu m}$) and etching rapidly near its Bragg peak ($V \approx 2.1$).
+Tritons (such as those produced by the ${}^{6}\text{Li}(n, \alpha){}^3\text{H}$ reaction at $E = 2.73\text{ MeV}$) have the same charge ($Z = 1$) as protons but three times the mass ($A = 3$). A $2.73\text{ MeV}$ triton travels at $v_t \approx v_p / \sqrt{3}$, depositing significantly higher LET ($\sim 32\text{ keV}/\mu\text{m}$ vs $\sim 13.5\text{ keV}/\mu\text{m}$) and etching rapidly near its Bragg peak ($V \approx 2.1$).
 
 TrackLab provides two dedicated models from literature:
 
