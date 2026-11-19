@@ -247,106 +247,41 @@ def run_mode4_fluka(
     vb=None,
     time_etching=None,
     output_csv=None,
-    skip_header=1,
+    skip_header=None,
 ):
-    """Mode 4: Process FLUKA phase-space file."""
-    import csv
+    """
+    Mode 4: Process FLUKA phase-space file.
+    Supports single-ion and multi-ion (protons, tritons, alpha, Li, C, O) files.
+    """
+    from .fluka_engine import process_fluka_file
 
-    from .calculate_track_parameter import calculate_track_parameters
-    from .config import TIME_ETCHING, get_vb_for_ion
-    from .load_srim_data import load_srim_data
-    from .vt_multiion import get_model
-    from .vt_utils import build_vrint_interpolator
-
-    if vb is None:
-        vb = get_vb_for_ion(ion)
-    if time_etching is None:
-        time_etching = TIME_ETCHING
     if input_file is None:
         input_file = input("FLUKA file path: ").strip()
     if output_csv is None:
         output_csv = f"fluka_results_{ion}.csv"
 
-    print(f"\nMode 4: FLUKA Processing for {ion}")
+    print("\nMode 4: FLUKA Phase-Space Processing")
     print(f"  File: {input_file}")
 
-    interps, _ = load_srim_data()
-    range_interp = interps.get(ion)
-    if range_interp is None:
-        print(f"ERROR: No SRIM data for ion '{ion}'")
-        return
+    res_dict = process_fluka_file(
+        file_path=input_file,
+        time_etching=time_etching,
+        vb=vb,
+        default_ion=ion,
+        skip_header=skip_header,
+        output_csv=output_csv,
+        progress_callback=lambda pct, msg: print(f"  [{pct:3d}%] {msg}") if pct % 25 == 0 or pct == 100 else None,
+    )
 
-    vt_model = get_model()
-
-    with open(input_file, "r") as f:
-        lines = [line.strip() for line in f if line.strip()]
-    lines = lines[skip_header:]
-    total = len(lines)
-    print(f"  {total} particles")
-
-    results, developed, skipped = [], 0, 0
-    for idx, line in enumerate(lines):
-        try:
-            parts = line.split()
-            if len(parts) < 8:
-                skipped += 1
-                continue
-            energy_mev = float(parts[1]) * 1000.0
-            z_val = float(parts[4]) if len(parts) > 4 else -0.55
-            cosz = np.clip(float(parts[7]), -1.0, 1.0)
-            if energy_mev <= 0:
-                skipped += 1
-                continue
-            angle_deg = 90.0 - np.degrees(np.arccos(abs(cosz)))
-
-            from .utils import compute_etching_time
-
-            etching_time_particle = compute_etching_time(
-                z_val, vb=vb, t_ref=time_etching, cosz=cosz
-            )
-            if etching_time_particle <= 0:
-                skipped += 1
-                continue
-
-            F_interp = build_vrint_interpolator(
-                vt_model=vt_model, ion=ion, energy=energy_mev, vb=vb
-            )
-            res = calculate_track_parameters(
-                energy=energy_mev,
-                angle_deg=angle_deg,
-                vb=vb,
-                time_etching=etching_time_particle,
-                range_interpolator=range_interp,
-                F_interp=F_interp,
-                ion=ion,
-                vt_model=vt_model,
-                is_bottom_track=(cosz < 0),
-            )
-            results.append(
-                {
-                    "energy_MeV": energy_mev,
-                    "angle_deg": angle_deg,
-                    "depth_um": res["depth_um"],
-                    "major_axis_um": res["major_axis_um"],
-                    "minor_axis_um": res["minor_axis_um"],
-                    "total_length_um": res["total_length_um"],
-                    "status": res["status"],
-                }
-            )
-            if res.get("indicator", -1) == 1:
-                developed += 1
-        except Exception:
-            skipped += 1
-
-        if (idx + 1) % max(1, total // 10) == 0:
-            print(f"  {idx + 1}/{total}")
+    results = res_dict["results"]
+    developed = res_dict["developed"]
+    skipped = res_dict["skipped"]
 
     print(f"\n  Processed: {len(results)}  Developed: {developed}  Skipped: {skipped}")
+    for species, count_data in res_dict.get("ion_counts", {}).items():
+        if count_data["total"] > 0:
+            print(f"    - {species:8s}: {count_data['total']:6d} simulated, {count_data['developed']:6d} developed")
     if results:
-        with open(output_csv, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=results[0].keys())
-            writer.writeheader()
-            writer.writerows(results)
         print(f"  Saved to: {output_csv}")
     return results
 

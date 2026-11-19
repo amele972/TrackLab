@@ -43,20 +43,66 @@ Generate a high-fidelity 4-panel diagnostic for a specific particle.
 ### Mode 3: Reference Dataset (LUT)
 Perform large-scale sweeps over energy and angle. This generates a **Lookup Table (LUT)** used for rapid detection-response mapping.
 
-### Mode 4: FLUKA Phase-Space Processor
-Directly convert FLUKA transport output into track distributions. Ideal for validating detector response in complex radiation fields.
+### Mode 4: FLUKA Multi-Ion Phase-Space Processor
+Directly convert FLUKA Monte Carlo phase-space outputs into etched track distributions. Automatically parses particle species (protons, tritons, alpha particles, lithium, carbon, oxygen), computes effective etching times based on particle origin depth, and models detector response across complex radiation fields.
 
 ### Mode 5: Visualization & Export
-Enables premium 3D operations:
-- **Mesh Subdivision**: Smoothens the analytical Z-slice surfaces.
+Enables 3D operations:
+- **Mesh Subdivision**: Smoothens the analytical surface mesh.
 - **Ambient Occlusion**: Enhances depth perception in 3D plots.
-- **CAD Export**: Save tracks as `.obj` or `.stl` for use in Blender or other modeling tools.
+- **CAD Export**: Save tracks as `.obj` or `.stl` for use in Blender or other 3D software.
 
 ---
 
 ## 💻 Programmatic API Usage
 
-You can integrate TrackLab physics directly into your Python scripts:
+### 1. Simple Single-Track Simulation
+
+TrackLab automatically handles SRIM interpolation and cumulative integrals internally:
+
+```python
+from tracklab import calculate_track_parameters, get_vb_for_ion
+
+# Calculate track parameters for a 1.5 MeV proton at 75° incidence
+result = calculate_track_parameters(
+    energy_MeV_u=1.5,
+    angle_deg=75.0,
+    vb_um_h=4.7,
+    time_etching_h=2.83,
+    ion="protons"
+)
+
+print(f"Status:     {result['status']}")
+print(f"Depth:      {result['depth_um']:.3f} µm")
+print(f"Major Axis: {result['major_axis_um']:.3f} µm")
+print(f"Minor Axis: {result['minor_axis_um']:.3f} µm")
+print(f"Black Part: {result['black_part']:.3f}")
+```
+
+### 2. Multi-Ion FLUKA Phase-Space Processing
+
+Process large-scale Monte Carlo transport outputs with automatic particle identification:
+
+```python
+from tracklab import process_fluka_file
+
+# Process phase-space data across all supported ions
+summary = process_fluka_file(
+    file_path="examples/AmBe_01001_Phase-space_BXDRAW.txt",
+    time_etching=2.83,
+    output_csv="fluka_tracks.csv"
+)
+
+print(f"Simulated: {summary['processed']} particles")
+print(f"Developed: {summary['developed']} etched pits")
+for ion, counts in summary["ion_counts"].items():
+    if counts["total"] > 0:
+        print(f"  {ion:8s}: {counts['developed']}/{counts['total']} developed")
+```
+
+### 3. High-Performance Precomputed Interpolators
+
+For large parameter sweeps or custom loops, precompute the interpolators once:
 
 ```python
 from tracklab import (
@@ -64,19 +110,19 @@ from tracklab import (
     calculate_track_parameters, get_vb_for_ion
 )
 
-# 1. Setup environment
+# 1. Setup physics engine
 interps, _ = load_srim_data()
 vt_model = get_vt_model()
 
 # 2. Define track parameters
-ion, energy, angle = 'protons', 1.5, 75.0
+ion, energy, angle = "tritons", 2.73, 90.0
 vb = get_vb_for_ion(ion)
 
-# 3. Precompute the cumulative integral
+# 3. Precompute cumulative integral
 F = build_vrint_interpolator(vt_model=vt_model, ion=ion, energy=energy, vb=vb)
 
-# 4. Run the high-fidelity geometry engine
-result = calculate_track_parameters(
+# 4. Fast calculation
+res = calculate_track_parameters(
     energy=energy,
     angle_deg=angle,
     vb=vb,
@@ -87,10 +133,7 @@ result = calculate_track_parameters(
     vt_model=vt_model
 )
 
-# 5. Extract English-standardized results
-print(f"Track Depth:  {result['depth_um']:.3f} µm")
-print(f"Major Axis:  {result['major_axis_um']:.3f} µm")
-print(f"Etched Distance: {result['etched_dist_um']:.3f} µm")
+print(f"Triton Depth: {res['depth_um']:.3f} µm | Opening: {res['major_axis_um']:.3f} µm")
 ```
 
 ---

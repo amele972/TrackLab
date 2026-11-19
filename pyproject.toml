@@ -48,7 +48,7 @@ tracklab-gui = "tracklab.gui:launch"
 packages = ["tracklab", "tracklab.gui"]
 
 [tool.setuptools.package-data]
-tracklab = ["data/*.dat", "data/*.xlsx"]
+tracklab = ["data/*.dat", "data/*.xlsx", "data/*.json", "data/*.npz"]
 
 [tool.ruff]
 line-length = 88

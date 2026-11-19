@@ -82,6 +82,30 @@ calculate_track_parameters(
 
 ---
 
+### `tracklab.fluka_engine`
+
+Unified multi-ion FLUKA Monte Carlo phase-space processor.
+
+**Functions:**
+```python
+process_fluka_file(
+    file_path: str,
+    time_etching: float = None,
+    vb: float = None,
+    default_ion: str = "protons",
+    skip_header: int = None,
+    output_csv: str = None,
+    progress_callback = None,
+    beam_energy_mev: float = None,
+) -> dict
+```
+- Automatically detects file format (`mgdraw_extended`, `bxdraw_standard`, or `simple_table`).
+- Resolves particle species: Protons ($Z=1, A=1$), Tritons ($Z=1, A=3$), Alpha ($Z=2$), Li ($Z=3$), Carbon ($Z=6$), Oxygen ($Z=8$).
+- Converts entrance trajectories ($\cos\theta_z$) to surface incidence angles and handles top vs bottom surface entry.
+- Returns dictionary containing complete track metrics, total processed/developed counts, and per-species statistics.
+
+---
+
 ### `tracklab.track_optics_p_optimized`
 
 Vectorized Snell's Law optics engine.

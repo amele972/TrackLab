@@ -60,35 +60,41 @@ This modern framework preserves the original physical foundations while extendin
 
 ## ⚙️ How it Works
 
-TrackLab computes the three-dimensional geometry of etched tracks by modelling the competition between the bulk detector etch rate ($V_B$) and the track etch rate ($V_T$).
+TrackLab simulates track formation following the physical sequence of the experiment:
 
-The track etch rate depends on the particle's residual range $R'$, calculated using SRIM range-energy tables and empirical parametrizations of the reduced etch-rate ratio $V(R') = V_T(R') / V_B$. For protons, TrackLab uses the standard Nikezic and Yu double-exponential model. For light ions, a Broken Power Law (BPL) or other selected empirical functions are used.
-
-After computing the 3D track mesh, TrackLab simulates its appearance under a transmission optical microscope by performing full 3D vector ray-tracing, checking for Total Internal Reflection (TIR), and computing intensity based on condenser-cone averaging and numerical aperture (NA) limits.
+1. **Energy Loss & Range**: The ion's initial kinetic energy is mapped to total range using SRIM stopping-power and range tables, evaluated via monotonic piecewise cubic Hermite (PCHIP) interpolation and Bragg-Kleeman scaling.
+2. **Track Etch Rate Ratio $V(y)$**: Latent damage increases the local dissolution rate along the trajectory ($v_T$) relative to the undamaged bulk rate ($v_B$). TrackLab computes $V(y) = v_T(y)/v_B \ge 1$ as a function of residual range $y$:
+   - **Protons**: Nikezic double-exponential fit or Hermsdorf model.
+   - **Tritons ($^3\text{H}$)**: Hermsdorf (2009) Bethe-Bloch analogy or Fromm (1990) resonance formulation.
+   - **Alpha particles**: Choice of 7 literature parameterizations (Hermsdorf, Brun, Durrani & Bull, Yu, etc.).
+   - **Heavy ions (Li, C, O)**: Broken Power Law (BPL) fits calibrated to experimental data.
+3. **Etchant Front & 3D Geometry**: The etchant enters the detector surface, dissolves bulk material at $v_B$, and advances rapidly along the damaged track axis. The pit profile is generated from the envelope of Huygens revelation spheres, yielding the 3D mesh, geometric depth, and surface opening axes.
+4. **Microscope Ray-Tracing**: A full 3D vector optics engine casts light rays through the plastic detector ($n = 1.504$), applies Snell's Law and Fresnel transmittance, checks for Total Internal Reflection (TIR), averages over the illumination condenser cone ($\text{NA}_{\text{cond}} = 0.25$), and applies the objective aperture filter ($\text{NA}_{\text{obj}} = 0.45$) to synthesize the transmission microscope image.
+5. **Monte Carlo Phase-Space Integration**: Reads particle phase-space outputs directly from FLUKA (supporting standard BXDRAW and advanced MGDRAW formats), resolving particle species, incidence angles, and effective etching times for complete detector field simulation.
 
 ---
 
 ## 🖥️ Graphical User Interface
 
-TrackLab features a comprehensive GUI for configuring parameters and running all operational modes without writing any code.
+TrackLab features a comprehensive GUI for configuring parameters and running all operational modes interactively.
 
 <p align="center">
   <img src="assets/GUI_2.jpg" alt="TrackLab GUI" width="800">
 </p>
 
 - **Mode 1:** V(y) Curve Explorer
-- **Mode 2:** Single Track Simulation (3D + Microscope view)
-- **Mode 3:** Look-Up Table (LUT) Creator
-- **Mode 4:** Monte Carlo (FLUKA) Processor
-- **Mode 5:** 3D Visualization & CAD Export
+- **Mode 2:** Single Track Simulation (3D mesh + Transmission microscope view)
+- **Mode 3:** Look-Up Table (LUT) Reference Generator
+- **Mode 4:** Monte Carlo (FLUKA) Multi-Ion Processor
+- **Mode 5:** 3D Visualization, Subdivision & CAD Export (.obj / .stl)
 - **Mode 6:** Fast LUT Interpolation
-- **Mode 7:** System Configuration
+- **Mode 7:** Physics Models & Configuration Summary
 
 To launch the dashboard, simply run:
 ```bash
 tracklab-gui
 ```
-*(Or use `python run_gui.py` from the source directory)*
+*(Or use `python run_gui.py` from the repository root)*
 
 ---
 
@@ -153,8 +159,9 @@ To change models at any time, go to the Configuration tab (Mode 7) in the app or
 
 ## 📓 Interactive User Guide
 
-For a step-by-step walk-through of the physics engine and analysis modes with executable code examples, check out the interactive Jupyter Notebook in the root directory:
-* [TrackLab_User_Guide.ipynb](TrackLab_User_Guide.ipynb)
+For a step-by-step walk-through of the physics engine and analysis modes with executable code examples, see the interactive tutorial notebooks:
+* [docs/TrackLab_User_Guide.ipynb](docs/TrackLab_User_Guide.ipynb) — Practical workflows, look-up tables, and FLUKA processing.
+* [docs/TrackLab_Guide.ipynb](docs/TrackLab_Guide.ipynb) — Comprehensive physics, ray-tracing derivation, and validation guide.
 
 ---
 

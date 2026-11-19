@@ -161,3 +161,89 @@ def test_triton_track_physics():
     assert res["major_axis_um"] == pytest.approx(
         res["minor_axis_um"], abs=1e-3
     )  # normal incidence is circular
+
+
+def test_triton_model_selection():
+    """Verify switching between Hermsdorf (1) and Fromm (2) triton V(y) models."""
+    from tracklab.vt_utils import triton_vt_function
+
+    y = 5.0  # residual range in um
+    v_hermsdorf = float(triton_vt_function(y, model_index=1))
+    v_fromm = float(triton_vt_function(y, model_index=2))
+
+    assert v_hermsdorf >= 1.0
+    assert v_fromm >= 1.0
+    # Both models should yield plausible peak etch-rate ratios between 1.5 and 2.5
+    assert 1.5 <= v_hermsdorf <= 2.5
+    assert 1.5 <= v_fromm <= 2.5
+
+
+def test_alpha_models_switching():
+    """Verify switching between Brun et al. (model 2) and Hermsdorf (model 5) for alphas."""
+    from tracklab.vt_utils import alpha_vt_function
+
+    y_vals = [1.0, 5.0, 15.0]
+    for y in y_vals:
+        v_brun = float(alpha_vt_function(y, model_index=2))
+        v_herms = float(alpha_vt_function(y, model_index=5))
+        assert v_brun >= 1.0
+        assert v_herms >= 1.0
+
+
+def test_bottom_track_physics():
+    """Verify reverse-side / bottom-surface entrance track calculation."""
+    interps, _ = load_srim_data()
+    vt_model = get_model()
+
+    # Particle entering from bottom surface
+    F = build_vrint_interpolator(vt_model=vt_model, ion="protons", energy=1.5, vb=4.7)
+    res_bottom = calculate_track_parameters(
+        energy=1.5,
+        angle_deg=75.0,
+        vb=4.7,
+        time_etching=2.83,
+        range_interpolator=interps["protons"],
+        F_interp=F,
+        ion="protons",
+        vt_model=vt_model,
+        is_bottom_track=True,
+    )
+    assert res_bottom["status"] == "Developed"
+    assert res_bottom["depth_um"] > 0.0
+
+
+def test_optics_ray_tracing():
+    """Verify 3D Snell's law optics and Total Internal Reflection calculation."""
+    from tracklab.track_optics_p_optimized import track_optics_p_optimized
+
+    interps, _ = load_srim_data()
+    vt_model = get_model()
+
+    F = build_vrint_interpolator(vt_model=vt_model, ion="protons", energy=1.5, vb=4.7)
+    res = calculate_track_parameters(
+        energy=1.5,
+        angle_deg=75.0,
+        vb=4.7,
+        time_etching=2.83,
+        range_interpolator=interps["protons"],
+        F_interp=F,
+        ion="protons",
+        vt_model=vt_model,
+    )
+
+    X_surf = res.get("X_surf")
+    Y_surf = res.get("Y_surf")
+    Z_surf = res.get("Z_surf")
+
+    assert X_surf is not None and len(X_surf) > 0
+
+    black_part, total_surf, proj_surf, vertices, normals_r, brightness = (
+        track_optics_p_optimized(
+            X_surf, Y_surf, Z_surf, condenser_na=0.25, n_cone_rays=8
+        )
+    )
+
+    assert 0.0 <= black_part <= 1.0
+    assert total_surf > 0.0
+    assert proj_surf > 0.0
+    assert len(brightness) > 0

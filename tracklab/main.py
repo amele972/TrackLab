@@ -88,8 +88,11 @@ def _mode3():
 def _mode4():
     from .mode_use import run_mode4_fluka
 
-    ion = _get_ion()
-    run_mode4_fluka(ion=ion)
+    input_file = input("  FLUKA file path: ").strip()
+    if not input_file:
+        print("  Cancelled.")
+        return
+    run_mode4_fluka(input_file=input_file)
 
 
 def _mode5():

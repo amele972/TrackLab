@@ -38,6 +38,32 @@ def example_proton():
     print(f"  Black frac: {result['black_part']:.4f}")
 
 
+def example_triton():
+    """Compute a single Triton (3H) track from 6Li(n,alpha)3H."""
+    from tracklab import calculate_track_parameters, get_vb_for_ion
+
+    print("\n=== Example: Triton Track (2.73 MeV) ===")
+
+    ion = "tritons"
+    energy = 2.73  # MeV
+    angle = 90.0  # degrees (normal incidence)
+    vb = get_vb_for_ion(ion)  # 4.7 µm/h
+    time = 2.83  # hours
+
+    result = calculate_track_parameters(
+        energy_MeV_u=energy, angle_deg=angle, vb_um_h=vb, time_etching_h=time, ion=ion
+    )
+
+    print(f"  Ion:        {ion}")
+    print(f"  Energy:     {energy} MeV")
+    print(f"  Angle:      {angle}°")
+    print(f"  VB:         {vb} µm/h")
+    print(f"  Status:     {result['status']}")
+    print(f"  Depth:      {result['depth_um']:.4f} µm")
+    print(f"  Major axis: {result['major_axis_um']:.4f} µm")
+    print(f"  Minor axis: {result['minor_axis_um']:.4f} µm")
+
+
 def example_carbon():
     """Compute a single Carbon ion track."""
     from tracklab import calculate_track_parameters, get_vb_for_ion
@@ -93,6 +119,7 @@ def example_vy_comparison():
 
 if __name__ == "__main__":
     example_proton()
+    example_triton()
     example_carbon()
     example_vy_comparison()
     print("\nAll examples completed successfully!")

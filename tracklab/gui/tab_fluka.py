@@ -80,11 +80,9 @@ class FlukaTab(QWidget):
         opts_row.addWidget(self.skip_header)
 
         opts_row.addSpacing(20)
-        self.beta_mode_cb = QCheckBox("Beta: Multi-Ion Mode (Advanced MGDRAW)")
-        self.beta_mode_cb.setToolTip(
-            "Enable this if you are using the new 'remlayer_events.dat' output format from the advanced multi-ion mgdraw_beta.f routine. It will automatically process ALL ions."
-        )
-        opts_row.addWidget(self.beta_mode_cb)
+        self.auto_ion_label = QLabel("Auto-detects particle species (protons, tritons, alpha, Li, C, O)")
+        self.auto_ion_label.setStyleSheet("color: #a6e3a1; font-size: 11px;")
+        opts_row.addWidget(self.auto_ion_label)
 
         opts_row.addStretch()
         layout.addLayout(opts_row)
@@ -120,9 +118,9 @@ class FlukaTab(QWidget):
 
         # Results table
         self.table = QTableWidget()
-        self.table.setColumnCount(6)
+        self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels(
-            ["E (MeV)", "Angle (°)", "Depth", "Major", "Minor", "Status"]
+            ["Ion", "E (MeV)", "Angle (°)", "Depth (µm)", "Major (µm)", "Minor (µm)", "Status"]
         )
         self.table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
@@ -149,7 +147,7 @@ class FlukaTab(QWidget):
 
     def _browse(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Select FLUKA File", "", "Text Files (*.txt);;All (*)"
+            self, "Select FLUKA File", "", "Text Files (*.txt);;Data Files (*.dat);;All (*)"
         )
         if path:
             # Reset state for the new file
@@ -171,7 +169,7 @@ class FlukaTab(QWidget):
                 )
             else:
                 self.status_text.setText(
-                    f"Loaded: {os.path.basename(path)}  |  ⚠ Beam energy not detected from filename"
+                    f"Loaded: {os.path.basename(path)}  |  Ready to process"
                 )
 
     def _parse_beam_energy(self, filename):
@@ -202,17 +200,10 @@ class FlukaTab(QWidget):
             "file": self.input_file,
             "skip_header": self.skip_header.value(),
             "beam_energy_MeV": getattr(self, "_beam_energy", None),
-            "beta_mode": self.beta_mode_cb.isChecked(),
         }
 
         print(f"\n[FlukaTab] Starting process for: {self.input_file}")
-
-        if params["beta_mode"]:
-            from .workers import FlukaMultiIonWorker
-
-            self.worker = FlukaMultiIonWorker(params)
-        else:
-            self.worker = FlukaWorker(params)
+        self.worker = FlukaWorker(params)
 
         self.worker.progress.connect(self.progress_bar.setValue)
         self.worker.status_update.connect(self.status_text.setText)
@@ -234,14 +225,21 @@ class FlukaTab(QWidget):
         self.val_developed.setText(str(data["developed"]))
         self.val_skipped.setText(str(data["skipped"]))
 
+        # Species summary text
+        ion_counts = data.get("ion_counts", {})
+        active_counts = [f"{k}: {v['developed']}/{v['total']}" for k, v in ion_counts.items() if v["total"] > 0]
+        if active_counts:
+            self.status_text.setText(f"Completed: {', '.join(active_counts)} developed")
+
         self.table.setRowCount(min(100, len(self.results)))
         for i, r in enumerate(self.results[:100]):
-            self.table.setItem(i, 0, QTableWidgetItem(f"{r['energy_MeV']:.2f}"))
-            self.table.setItem(i, 1, QTableWidgetItem(f"{r['angle_deg']:.1f}"))
-            self.table.setItem(i, 2, QTableWidgetItem(f"{r['depth_um']:.3f}"))
-            self.table.setItem(i, 3, QTableWidgetItem(f"{r['major_axis_um']:.3f}"))
-            self.table.setItem(i, 4, QTableWidgetItem(f"{r['minor_axis_um']:.3f}"))
-            self.table.setItem(i, 5, QTableWidgetItem(r["status"]))
+            self.table.setItem(i, 0, QTableWidgetItem(str(r.get("ion", "protons"))))
+            self.table.setItem(i, 1, QTableWidgetItem(f"{r['energy_MeV']:.2f}"))
+            self.table.setItem(i, 2, QTableWidgetItem(f"{r['angle_deg']:.1f}"))
+            self.table.setItem(i, 3, QTableWidgetItem(f"{r['depth_um']:.3f}"))
+            self.table.setItem(i, 4, QTableWidgetItem(f"{r['major_axis_um']:.3f}"))
+            self.table.setItem(i, 5, QTableWidgetItem(f"{r['minor_axis_um']:.3f}"))
+            self.table.setItem(i, 6, QTableWidgetItem(str(r.get("status", "unknown"))))
         self._reset()
 
     def _reset(self):

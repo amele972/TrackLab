@@ -24,6 +24,7 @@ from .config import (
     VB_BY_ION,
     get_vb_for_ion,
 )
+from .fluka_engine import process_fluka_file
 from .load_srim_data import (
     interpolate_range,
     load_srim_data,
